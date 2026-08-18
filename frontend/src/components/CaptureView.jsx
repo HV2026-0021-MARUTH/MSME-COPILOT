@@ -3,6 +3,7 @@ import { Camera, Mic, Edit3, UploadCloud, AlertCircle, CheckCircle2, Loader2, Fi
 import InvoiceReview from './InvoiceReview'
 import SaleReview from './SaleReview'
 import ManualSaleForm from './ManualSaleForm'
+import BulkImportView from './BulkImportView'
 
 export default function CaptureView({ products, onPurchaseConfirmed }) {
   const [activeMode, setActiveMode] = useState('sales') // 'sales' or 'invoice'
@@ -208,6 +209,12 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
         >
           <Camera size={18} /> Add Stock from Invoice
         </button>
+        <button
+          onClick={() => setActiveMode('bulk_import')}
+          style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', background: activeMode === 'bulk_import' ? 'var(--accent-blue)' : 'var(--bg-card)', color: activeMode === 'bulk_import' ? 'white' : 'var(--text-muted)', border: '1px solid var(--border-color)', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+        >
+          <UploadCloud size={18} /> Bulk Import (CSV)
+        </button>
       </div>
 
       {error && (
@@ -334,6 +341,11 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* Mode 3: Bulk Import */}
+      {activeMode === 'bulk_import' && (
+        <BulkImportView onImportComplete={onPurchaseConfirmed} />
       )}
     </div>
   )

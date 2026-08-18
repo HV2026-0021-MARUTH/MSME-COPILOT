@@ -105,6 +105,7 @@ npm run build
 - **Real-Time BI Dashboard**: Metric cards, interactive Recharts sales trends, top sellers, and single-product analytics modal.
 - **Deterministic Demand Forecasting**: Weighted moving average (`0.5*7d + 0.3*prev7d + 0.2*30d`), coverage days, stock risk, and reorder math.
 - **Grounded AI Business Advisor**: Evidence-based action plan with `[FACT]` vs `[RECOMMENDATION]` badges and deterministic fallback engine.
+- **CSV & Excel Bulk Import**: Upload historical sales data through CSV/XLSX to automatically build forecasts and dashboard metrics, with intelligent column mapping and new product detection.
 - **Seasonal & Local Intelligence**: 3-tier location resolver (GPS → Manual → Store Default) + Indian festival demand drivers.
 - **Multi-Format Business Reports**: 100% numerically consistent exports in PDF, 7-sheet Excel (XLSX), and PNG dashboard cards.
 - **Responsive UI & Quality**: Mobile/Tablet/Laptop/PC responsive layout with 83/83 automated Pytests passing.

@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from app.config import settings
 from app.db.database import init_sqlite_db_and_seed
 from app.api import (
-    dashboard, inventory, sales, purchases, advisor, reports, intelligence, analytics
+    dashboard, inventory, sales, purchases, advisor, reports, intelligence, analytics, import_data
 )
 
 @asynccontextmanager
@@ -49,3 +49,4 @@ app.include_router(analytics.router)
 app.include_router(advisor.router)
 app.include_router(intelligence.router)
 app.include_router(reports.router)
+app.include_router(import_data.router)

@@ -7,8 +7,11 @@ import DashboardView from './components/DashboardView'
 import AdvisorView from './components/AdvisorView'
 import LocalInsightsView from './components/LocalInsightsView'
 import ReportsView from './components/ReportsView'
+import Auth from './components/Auth'
+import { supabase } from './lib/supabase'
 
 export default function App() {
+  const [session, setSession] = useState(null)
   const [activeTab, setActiveTab] = useState('Dashboard')
   const [healthStatus, setHealthStatus] = useState({ loading: true, data: null, error: null })
   const [products, setProducts] = useState([])
@@ -40,6 +43,20 @@ export default function App() {
       .catch(err => setHealthStatus({ loading: false, data: null, error: err.message }))
 
     fetchProducts()
+  }, [])
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleStockOrSaleConfirmed = () => {
@@ -79,53 +96,77 @@ export default function App() {
             {theme === 'dark' ? <Sun size={15} color="var(--accent-amber)" /> : <Moon size={15} color="var(--accent-blue)" />}
             <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
+          
+          {session && (
+            <button
+              onClick={() => supabase.auth.signOut()}
+              style={{
+                padding: '0.4rem 0.8rem',
+                borderRadius: '0.5rem',
+                border: '1px solid var(--border-color)',
+                background: 'transparent',
+                color: 'var(--text-main)',
+                cursor: 'pointer',
+                fontSize: '0.85rem'
+              }}
+            >
+              Sign Out
+            </button>
+          )}
+
           <div className="badge" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Store size={14} /> Sri Lakshmi General Store (Ameerpet)
           </div>
         </div>
       </header>
 
-      <div className="nav-tabs">
-        {tabs.map(tab => (
-          <button
-            key={tab}
-            className={`nav-tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => {
-              setActiveTab(tab)
-              if (tab === 'Capture' || tab === 'Inventory') fetchProducts()
-            }}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      {!session ? (
+        <Auth onLogin={setSession} />
+      ) : (
+        <>
+          <div className="nav-tabs">
+            {tabs.map(tab => (
+              <button
+                key={tab}
+                className={`nav-tab ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveTab(tab)
+                  if (tab === 'Capture' || tab === 'Inventory') fetchProducts()
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
 
-      {(activeTab === 'Dashboard' || activeTab === 'Forecast') && (
-        <DashboardView />
-      )}
+          {(activeTab === 'Dashboard' || activeTab === 'Forecast') && (
+            <DashboardView />
+          )}
 
-      {activeTab === 'Capture' && (
-        <CaptureView products={products} onPurchaseConfirmed={handleStockOrSaleConfirmed} />
-      )}
+          {activeTab === 'Capture' && (
+            <CaptureView products={products} onPurchaseConfirmed={handleStockOrSaleConfirmed} />
+          )}
 
-      {activeTab === 'Inventory' && (
-        <InventoryView onInventoryChange={handleStockOrSaleConfirmed} />
-      )}
+          {activeTab === 'Inventory' && (
+            <InventoryView onInventoryChange={handleStockOrSaleConfirmed} />
+          )}
 
-      {activeTab === 'Sales' && (
-        <SalesHistoryView />
-      )}
+          {activeTab === 'Sales' && (
+            <SalesHistoryView />
+          )}
 
-      {activeTab === 'AI Advisor' && (
-        <AdvisorView />
-      )}
+          {activeTab === 'AI Advisor' && (
+            <AdvisorView />
+          )}
 
-      {activeTab === 'Local Insights' && (
-        <LocalInsightsView />
-      )}
+          {activeTab === 'Local Insights' && (
+            <LocalInsightsView />
+          )}
 
-      {activeTab === 'Reports' && (
-        <ReportsView />
+          {activeTab === 'Reports' && (
+            <ReportsView />
+          )}
+        </>
       )}
 
       {/* Footer Health Check Bar */}
