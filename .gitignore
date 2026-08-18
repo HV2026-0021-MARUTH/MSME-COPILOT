@@ -56,3 +56,15 @@ reports/*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Temporary uploaded/test files
+temp_uploads/
+**/temp_uploads/
+
+# Any nested virtual environments
+**/venv/
+**/.venv/

@@ -16,6 +16,64 @@ export default function DashboardView() {
 
   const [selectedProductId, setSelectedProductId] = useState(null)
 
+  const TodaysActionPlan = ({ data }) => {
+    const actions = [];
+    
+    if (data.reorder_suggestions) {
+      const urgent = data.reorder_suggestions.filter(s => s.stock_status === 'OUT_OF_STOCK' || s.stock_status === 'AT_RISK');
+      urgent.forEach(u => {
+        actions.push({ type: 'URGENT', title: `Reorder ${u.name}`, desc: `Stock status is ${u.stock_status.replace('_', ' ')}. Recommended purchase: +${u.planning_suggestion.recommended_purchase} units.`});
+      });
+    }
+
+    if (data.profit_leaders) {
+      const leaders = data.profit_leaders.slice(0, 2);
+      leaders.forEach(l => {
+        actions.push({ type: 'OPPORTUNITY', title: `Promote ${l.name}`, desc: `High profit leader generating ₹${l.profit} profit.`});
+      });
+    }
+    
+    if (data.slow_moving_products) {
+      const slow = data.slow_moving_products.slice(0, 2);
+      slow.forEach(s => {
+        actions.push({ type: 'WATCH', title: `Review ${s.name}`, desc: s.reason });
+      });
+    }
+
+    const finalActions = actions.slice(0, 4);
+
+    if (finalActions.length === 0) {
+      return (
+        <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-green)' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem' }}>🎯 Today's Action Plan</h3>
+          <p style={{ color: 'var(--text-muted)' }}>No urgent actions today. Your current inventory and sales position look healthy.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="card" style={{ marginBottom: '1.5rem' }}>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>🎯 Today's Action Plan</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+          {finalActions.map((action, idx) => {
+            const color = action.type === 'URGENT' ? 'var(--accent-red)' : action.type === 'OPPORTUNITY' ? 'var(--accent-green)' : 'var(--accent-amber)';
+            const bg = action.type === 'URGENT' ? 'rgba(239, 68, 68, 0.15)' : action.type === 'OPPORTUNITY' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)';
+            return (
+              <div key={idx} style={{ background: '#0f172a', padding: '0.85rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', borderLeft: `4px solid ${color}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                  <span style={{ fontSize: '0.95rem', fontWeight: '700' }}>{action.title}</span>
+                  <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', background: bg, color: color, fontWeight: '700' }}>{action.type}</span>
+                </div>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{action.desc}</p>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+
   const fetchDashboardData = async () => {
     try {
       setLoading(true)
@@ -38,7 +96,7 @@ export default function DashboardView() {
       setProductsPerf(prodJson || [])
       setError(null)
     } catch (err) {
-      setError(err.message)
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setLoading(false)
     }
@@ -68,11 +126,24 @@ export default function DashboardView() {
   }
 
   if (error) {
-    return <div style={{ color: 'var(--accent-red)', padding: '1rem' }}>Failed to load dashboard: {error}</div>
+    return (
+      <div style={{ 
+        color: 'var(--accent-red)', 
+        padding: '1.25rem', 
+        background: 'rgba(239, 68, 68, 0.1)', 
+        borderRadius: '0.5rem', 
+        border: '1px solid var(--accent-red)',
+        marginBottom: '1rem' 
+      }}>
+        Unable to complete this action. MARUTHI backend is unavailable. ({error})
+      </div>
+    )
   }
 
   return (
     <div>
+      {/* 0. Today's Action Plan */}
+      <TodaysActionPlan data={dashboardData} />
       {/* 1. Top KPI Summary Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         <div className="card" style={{ marginBottom: 0 }}>

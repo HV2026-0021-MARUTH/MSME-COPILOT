@@ -18,6 +18,8 @@ export default function App() {
   const [products, setProducts] = useState([])
   const [theme, setTheme] = useState(() => localStorage.getItem('maruthi_theme') || 'dark')
 
+  const [showDemoModal, setShowDemoModal] = useState(false);
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('maruthi_theme', theme)
@@ -77,6 +79,22 @@ export default function App() {
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>AI Retail Copilot for Small Retailers</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          
+          <button
+            onClick={() => setShowDemoModal(true)}
+            style={{
+              padding: '0.4rem 0.8rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border-color)',
+              background: 'transparent',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
+              fontSize: '0.85rem'
+            }}
+          >
+            Demo Data
+          </button>
+
           <button
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
@@ -171,13 +189,59 @@ export default function App() {
         </>
       )}
 
+      {/* Demo Data Modal */}
+      {showDemoModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="card" style={{ maxWidth: '500px', width: '90%', margin: '0 auto', background: 'var(--bg-main)' }}>
+            <h3 style={{ marginTop: 0, fontSize: '1.25rem' }}>Reset Demo Data</h3>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+              To ensure data safety, MARUTHI does not provide a one-click database reset via the UI. 
+              To reset the application to its clean demo state, please run the setup script provided in the backend directory:
+            </p>
+            <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1.5rem', border: '1px solid var(--border-color)', color: 'white', fontFamily: 'monospace' }}>
+              &gt; cd backend <br/>
+              &gt; ./setup.bat    <span style={{ color: 'var(--text-muted)' }}>// Windows</span><br/>
+              &gt; ./setup.sh     <span style={{ color: 'var(--text-muted)' }}>// Mac/Linux</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={() => setShowDemoModal(false)}
+                style={{ padding: '0.5rem 1rem', background: 'var(--accent-blue)', color: 'white', border: 'none', borderRadius: '0.375rem', cursor: 'pointer', fontWeight: '600' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Footer Health Check Bar */}
       <footer style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {healthStatus.data && (
-          <div className="status-box" style={{ fontSize: '0.8rem', padding: '0.25rem 0.6rem' }}>
-            <CheckCircle size={12} /> Backend Status: {healthStatus.data.status} (v{healthStatus.data.version})
-          </div>
-        )}
+        <div className="status-box" style={{ 
+            fontSize: '0.85rem', 
+            padding: '0.4rem 0.8rem', 
+            background: (!healthStatus.data || healthStatus.error) ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+            color: (!healthStatus.data || healthStatus.error) ? 'var(--accent-red)' : 'var(--accent-green)',
+            border: `1px solid ${(!healthStatus.data || healthStatus.error) ? 'var(--accent-red)' : 'var(--accent-green)'}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            fontWeight: '600'
+          }}>
+            {healthStatus.loading ? (
+              <>⏳ Checking System Status...</>
+            ) : (!healthStatus.data || healthStatus.error) ? (
+              <>
+                <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent-red)' }}></span>
+                🔴 Backend Offline: Please start the MARUTHI backend.
+              </>
+            ) : (
+              <>
+                <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent-green)' }}></span>
+                🟢 MARUTHI System Online (v{healthStatus.data.version})
+              </>
+            )}
+        </div>
       </footer>
     </div>
   )

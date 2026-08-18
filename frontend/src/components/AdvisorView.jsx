@@ -22,7 +22,7 @@ export default function AdvisorView() {
       setTomorrowPlan(data)
       setPlanError(null)
     } catch (err) {
-      setPlanError(err.message)
+      setPlanError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setLoadingPlan(false)
     }
@@ -55,7 +55,7 @@ export default function AdvisorView() {
       setQaHistory(prev => [data, ...prev])
       setQuestion('')
     } catch (err) {
-      setAskError(err.message)
+      setAskError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setAskLoading(false)
     }
@@ -99,9 +99,18 @@ export default function AdvisorView() {
         </h3>
 
         {loadingPlan ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Collecting verified store evidence & building plan...</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Preparing business insights...</div>
         ) : planError ? (
-          <div style={{ color: 'var(--accent-red)', padding: '1rem' }}>Failed to load action plan: {planError}</div>
+          <div style={{ 
+            color: 'var(--accent-red)', 
+            padding: '1.25rem', 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            borderRadius: '0.5rem', 
+            border: '1px solid var(--accent-red)',
+            marginBottom: '1rem' 
+          }}>
+            Unable to complete this action. MARUTHI backend is unavailable.
+          </div>
         ) : tomorrowPlan?.recommendations ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {tomorrowPlan.recommendations.map((rec) => (
@@ -117,13 +126,15 @@ export default function AdvisorView() {
                   {getCategoryBadge(rec.category)}
                 </div>
 
-                {/* RECOMMENDATION Statement */}
+                {/* SIGNAL Statement */}
                 <div style={{ background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '1rem', border: '1px solid var(--border-color)' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--accent-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.2rem' }}>
-                    💡 RECOMMENDATION
+                  <span style={{ fontSize: '0.75rem', color: 'var(--accent-amber)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.2rem' }}>
+                    📡 SIGNAL DETECTED
                   </span>
                   <p style={{ fontSize: '0.9rem', color: 'white', fontWeight: '500', margin: 0 }}>
-                    {rec.recommendation_summary}
+                    {rec.category === 'URGENT_REORDER' ? 'Inventory threshold critically low based on recent sales velocity.' :
+                     rec.category === 'PROFIT_OPPORTUNITY' ? 'High margin product showing sustained demand.' :
+                     'Product stagnation detected in recent 30-day window.'}
                   </p>
                 </div>
 
@@ -131,7 +142,7 @@ export default function AdvisorView() {
                 {rec.facts && rec.facts.length > 0 && (
                   <div style={{ marginBottom: '1rem' }}>
                     <span style={{ fontSize: '0.75rem', color: 'var(--accent-green)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
-                      ✓ VERIFIED DATABASE FACTS
+                      ✓ FACT (Verified Database Evidence)
                     </span>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.5rem' }}>
                       {rec.facts.map((fact, idx) => (
@@ -144,6 +155,16 @@ export default function AdvisorView() {
                     </div>
                   </div>
                 )}
+
+                {/* RECOMMENDATION Statement */}
+                <div style={{ background: '#0f172a', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '1rem', border: '1px solid var(--border-color)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--accent-blue)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '0.2rem' }}>
+                    💡 RECOMMENDATION
+                  </span>
+                  <p style={{ fontSize: '0.9rem', color: 'white', fontWeight: '500', margin: 0 }}>
+                    {rec.recommendation_summary}
+                  </p>
+                </div>
 
                 {/* Action Steps */}
                 {rec.action_steps && rec.action_steps.length > 0 && (

@@ -26,7 +26,7 @@ export default function InventoryView({ onInventoryChange }) {
       setInventory(data)
       setError(null)
     } catch (err) {
-      setError(err.message)
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setLoading(false)
     }

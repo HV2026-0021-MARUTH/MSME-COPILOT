@@ -109,7 +109,7 @@ export default function InvoiceReview({ extractionData, products, onConfirmSucce
       const result = await res.json()
       onConfirmSuccess(result)
     } catch (err) {
-      setError(err.message)
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setIsConfirming(false)
     }
@@ -204,7 +204,13 @@ export default function InvoiceReview({ extractionData, products, onConfirmSucce
               <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '0.75rem 1rem', fontWeight: '500' }}>
                   {item.extracted_name}
-                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>Confidence: {Math.round((item.confidence || 0) * 100)}%</span>
+                  {item.confidence !== undefined && (
+                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                      <span style={{ padding: '0.15rem 0.4rem', borderRadius: '0.25rem', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-blue)', fontWeight: '600', border: '1px solid rgba(59,130,246,0.2)' }}>
+                        AI Confidence: {Math.round((item.confidence || 0) * 100)}%
+                      </span>
+                    </span>
+                  )}
                 </td>
 
                 <td style={{ padding: '0.75rem 1rem' }}>

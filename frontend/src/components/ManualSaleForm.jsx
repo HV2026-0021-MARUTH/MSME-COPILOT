@@ -95,7 +95,7 @@ export default function ManualSaleForm({ products, onConfirmSuccess, onBack }) {
       const result = await res.json()
       onConfirmSuccess(result)
     } catch (err) {
-      setError(err.message)
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setIsSubmitting(false)
     }

@@ -36,7 +36,7 @@ export default function BulkImportView({ onImportComplete }) {
       
       setPreviewData(data)
     } catch (err) {
-      setError(err.message)
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setLoading(false)
     }
@@ -84,7 +84,7 @@ export default function BulkImportView({ onImportComplete }) {
         onImportComplete()
       }
     } catch (err) {
-      setError(err.message)
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setLoading(false)
     }

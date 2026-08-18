@@ -19,7 +19,7 @@ export default function ProductAnalyticsModal({ productId, onClose }) {
         setData(data)
         setError(null)
       })
-      .catch(err => setError(err.message))
+      .catch(err => setError('Unable to complete this action. MARUTHI backend is unavailable.'))
       .finally(() => setLoading(false))
   }, [productId])
 

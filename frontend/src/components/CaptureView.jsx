@@ -87,14 +87,13 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
       })
 
       if (!res.ok) {
-        const errData = await res.json()
-        throw new Error(errData.detail || 'Failed to parse sale text')
+        throw new Error('Failed to parse sale text')
       }
 
       const data = await res.json()
       setSaleParseResult(data)
     } catch (err) {
-      setError(err.message)
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setSalesLoading(false)
     }
@@ -123,7 +122,7 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
       setInvoiceLoadingStep('Uploading invoice photo...')
       await new Promise(r => setTimeout(r, 300))
 
-      setInvoiceLoadingStep('Reading invoice with Vision AI / OCR...')
+      setInvoiceLoadingStep('Reading invoice...')
       const formData = new FormData()
       formData.append('file', file)
 
@@ -133,14 +132,13 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
       })
 
       if (!res.ok) {
-        const errData = await res.json()
-        throw new Error(errData.detail || 'Invoice processing failed')
+        throw new Error('Invoice processing failed')
       }
 
       const data = await res.json()
       setExtractionResult(data)
     } catch (err) {
-      setError(err.message || 'Invoice could not be read clearly. Try a brighter photo or upload a clearer image.')
+      setError('Unable to complete this action. MARUTHI backend is unavailable.')
     } finally {
       setInvoiceLoading(false)
       setInvoiceLoadingStep('')
@@ -284,7 +282,7 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
               style={{ width: '100%', padding: '0.65rem', background: 'var(--accent-blue)', border: 'none', color: 'white', borderRadius: '0.375rem', fontWeight: '600', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
             >
               {salesLoading ? <Loader2 size={16} className="spin" /> : <Edit3 size={16} />}
-              {salesLoading ? 'Parsing Sale...' : 'Parse Sale Text'}
+              {salesLoading ? 'Analyzing sale...' : 'Parse Sale Text'}
             </button>
           </div>
 
