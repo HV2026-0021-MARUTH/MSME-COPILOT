@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://REPLACE_WITH_YOUR_BACKEND_URL/api/:match*"
+      "destination": "https://msme-copilot.onrender.com/api/:match*"
     },
     {
       "source": "/(.*)",
