@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: msme-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount the sqlite DB so data is persistent across restarts
+      - db_data:/app/data
+    env_file:
+      - ./backend/.env
+    # We override the DATABASE_URL to use the mounted volume for sqlite
+    # Alternatively, you can use Supabase by setting it in the .env file
+    # environment:
+    #   - DATABASE_URL=sqlite:///./data/maruthi.db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: msme-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    # We can pass env vars directly to the build using args if we want vite to bake them in,
+    # but since they are in frontend/.env, we can just let Docker build pick them up if we
+    # pass them via build args. However, for a simple setup, you should ensure your 
+    # VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are in your frontend/.env file
+    # before running docker-compose build.
+
+volumes:
+  db_data:
