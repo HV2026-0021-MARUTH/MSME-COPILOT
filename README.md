@@ -45,7 +45,20 @@ maruthi/
 
 ## Setup & Running
 
-### 1. Backend Setup & Test Runner
+### Automated Setup (Recommended)
+If you have just cloned the repository, simply run the setup script to instantly build your local environment (creates `.env` files, installs dependencies, creates database, and runs tests).
+
+**Windows:**
+```bash
+setup.bat
+```
+
+**Mac/Linux:**
+```bash
+./setup.sh
+```
+
+### Manual Backend Setup & Test Runner
 
 ```bash
 cd backend

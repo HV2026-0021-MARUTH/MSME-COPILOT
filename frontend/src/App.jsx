@@ -120,7 +120,8 @@ export default function App() {
         </div>
       </header>
 
-      {!session ? (
+      {/* Bypassed Auth for local development */}
+      {false ? (
         <Auth onLogin={setSession} />
       ) : (
         <>
