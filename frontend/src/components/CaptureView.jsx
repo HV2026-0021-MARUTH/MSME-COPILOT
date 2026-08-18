@@ -29,7 +29,7 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
     if (!SpeechRecognition) {
-      setSpeechWarning("Voice input isn't available in this browser. You can type the sale instead.")
+      setSpeechWarning("Voice recognition is not supported in this browser. Please use text input or manual sale entry.")
       return
     }
 

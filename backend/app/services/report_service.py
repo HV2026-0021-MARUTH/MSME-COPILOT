@@ -500,8 +500,12 @@ def generate_png_report(data: Dict[str, Any]) -> bytes:
     ax.text(0.05, y_pos, "TOMORROW'S PRIORITY ACTION", fontsize=13, fontweight='bold', color=c_amber)
     y_pos -= 0.035
     adv_recs = data["advisor"]["recommendations"]
-    adv_title = adv_recs[0]["title"] if adv_recs else "Inventory healthy"
-    adv_sum = adv_recs[0]["recommendation_summary"] if adv_recs else "No urgent reorders."
+    raw_adv_title = adv_recs[0]["title"] if adv_recs else "Inventory healthy"
+    raw_adv_sum = adv_recs[0]["recommendation_summary"] if adv_recs else "No urgent reorders."
+
+    # Strip unicode emojis for matplotlib font safety
+    adv_title = raw_adv_title.encode('ascii', 'ignore').decode('ascii').strip()
+    adv_sum = raw_adv_sum.encode('ascii', 'ignore').decode('ascii').strip()
 
     ax.text(0.07, y_pos, f"Priority: {adv_title}", fontsize=11, fontweight='bold', color=c_white)
     y_pos -= 0.03

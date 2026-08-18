@@ -30,7 +30,12 @@ export default function ReportsView() {
 
       setStatusMsg(`✓ ${format.toUpperCase()} report downloaded successfully!`)
     } catch (err) {
-      setStatusMsg(`❌ Error: ${err.message}`)
+      console.error("Report generation error:", err)
+      const isConnectionErr = err.message && (err.message.includes('fetch') || err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))
+      const userMsg = isConnectionErr
+        ? "Unable to connect to MARUTHI server. Please ensure the backend is running."
+        : (err.message || "Failed to generate report")
+      setStatusMsg(`❌ ${userMsg}`)
     } finally {
       setDownloadingFormat(null)
     }

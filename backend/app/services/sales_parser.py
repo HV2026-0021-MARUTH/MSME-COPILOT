@@ -18,6 +18,26 @@ def parse_number_from_token(token: str) -> int:
         return NUMBER_WORDS[token_lower]
     return None
 
+def get_prod_id(prod: Any) -> str:
+    if isinstance(prod, dict):
+        return prod.get("id") or prod.get("product_id")
+    return getattr(prod, "id", None) or getattr(prod, "product_id", str(prod))
+
+def get_prod_name(prod: Any) -> str:
+    if isinstance(prod, dict):
+        return prod.get("name") or prod.get("product_name", "")
+    return getattr(prod, "name", None) or getattr(prod, "product_name", str(prod))
+
+def get_prod_sp(prod: Any) -> float:
+    if isinstance(prod, dict):
+        return float(prod.get("selling_price", 0.0))
+    return float(getattr(prod, "selling_price", 0.0))
+
+def get_prod_cp(prod: Any) -> float:
+    if isinstance(prod, dict):
+        return float(prod.get("purchase_price", 0.0))
+    return float(getattr(prod, "purchase_price", 0.0))
+
 def find_candidate_products(query: str, db_products: List[Any]) -> List[Dict[str, Any]]:
     """
     Find candidate DB products matching a query string (handles exact, substring, prefix, and fuzzy/colloquial matching).
@@ -36,8 +56,8 @@ def find_candidate_products(query: str, db_products: List[Any]) -> List[Dict[str
     seen_ids = set()
 
     for prod in db_products:
-        prod_id = getattr(prod, 'id', None) or getattr(prod, 'product_id', str(prod))
-        prod_name = prod.name
+        prod_id = get_prod_id(prod)
+        prod_name = get_prod_name(prod)
         norm_prod = normalize_string(prod_name)
 
         matched = False
@@ -86,6 +106,7 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
     if not text or not text.strip():
         return {
             "mode": "text",
+            "raw_text": text or "",
             "items": [],
             "estimated_total": 0.0,
             "estimated_profit": 0.0,
@@ -99,7 +120,6 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
     parsed_items = []
     estimated_total = 0.0
     estimated_profit = 0.0
-    requires_review = False
 
     for seg in segments:
         tokens = seg.split()
@@ -132,40 +152,51 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
         confidence = 0.0
         candidate_list = []
 
-        if len(candidates) == 1 and candidates[0]["score"] >= 0.85:
+        if candidates:
             top = candidates[0]
-            match_status = "MATCHED"
-            matched_prod_id = top["product"].id
-            matched_prod_name = top["product"].name
-            unit_sp = float(top["product"].selling_price)
-            unit_cp = float(top["product"].purchase_price)
-            confidence = round(top["score"], 2)
-        elif len(candidates) >= 1:
-            # Ambiguous or multiple candidate matches -> Requires user resolution
-            match_status = "AMBIGUOUS" if len(candidates) > 1 else "MATCHED"
-            if len(candidates) == 1:
-                top = candidates[0]
-                matched_prod_id = top["product"].id
-                matched_prod_name = top["product"].name
-                unit_sp = float(top["product"].selling_price)
-                unit_cp = float(top["product"].purchase_price)
-                confidence = round(top["score"], 2)
-            else:
-                requires_review = True
-                confidence = round(candidates[0]["score"], 2)
+            top_score = top["score"]
 
             candidate_list = [
                 {
-                    "product_id": c["product"].id,
-                    "name": c["product"].name,
-                    "category": c["product"].category,
-                    "selling_price": float(c["product"].selling_price)
+                    "product_id": get_prod_id(c["product"]),
+                    "name": get_prod_name(c["product"]),
+                    "category": getattr(c["product"], 'category', 'General') if not isinstance(c["product"], dict) else c["product"].get('category', 'General'),
+                    "selling_price": get_prod_sp(c["product"])
                 }
                 for c in candidates[:5]
             ]
+
+            # Check if top candidate is an EXACT or normalized exact match (score == 1.0)
+            if top_score >= 0.99:
+                match_status = "EXACT"
+                matched_prod_id = get_prod_id(top["product"])
+                matched_prod_name = get_prod_name(top["product"])
+                unit_sp = get_prod_sp(top["product"])
+                unit_cp = get_prod_cp(top["product"])
+                confidence = 1.0
+
+            # Single high-confidence match (score >= 0.85 with no competing second candidate)
+            elif top_score >= 0.85 and (len(candidates) == 1 or (top_score - candidates[1]["score"]) >= 0.15):
+                match_status = "MATCHED"
+                matched_prod_id = get_prod_id(top["product"])
+                matched_prod_name = get_prod_name(top["product"])
+                unit_sp = get_prod_sp(top["product"])
+                unit_cp = get_prod_cp(top["product"])
+                confidence = round(top_score, 2)
+
+            # Ambiguous match (multiple plausible candidates without a single clear winner)
+            elif len(candidates) >= 1 and top_score >= 0.45:
+                match_status = "AMBIGUOUS"
+                matched_prod_id = get_prod_id(top["product"])
+                matched_prod_name = get_prod_name(top["product"])
+                unit_sp = get_prod_sp(top["product"])
+                unit_cp = get_prod_cp(top["product"])
+                confidence = round(top_score, 2)
+            else:
+                match_status = "NEEDS_MATCH"
+                confidence = round(top_score, 2) if top_score > 0 else 0.0
         else:
             match_status = "NEEDS_MATCH"
-            requires_review = True
             confidence = 0.0
 
         line_total = round(quantity * unit_sp, 2)
@@ -190,6 +221,7 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
 
     estimated_total = round(estimated_total, 2)
     estimated_profit = round(estimated_profit, 2)
+    requires_review = any(i["match_status"] not in ["EXACT", "MATCHED"] for i in parsed_items)
 
     return {
         "mode": "text",
@@ -197,5 +229,5 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
         "items": parsed_items,
         "estimated_total": estimated_total,
         "estimated_profit": estimated_profit,
-        "requires_review": requires_review or any(i["match_status"] != "MATCHED" for i in parsed_items)
+        "requires_review": requires_review
     }

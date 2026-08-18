@@ -39,11 +39,59 @@ def test_parse_sales_text_unit():
     res = parse_sales_text("Sold 3 Coca-Cola 250ml and 2 Lays Classic Salted 50g", db_prods)
     assert res["requires_review"] == False
     assert len(res["items"]) == 2
+    
+    item1 = res["items"][0]
+    assert item1["matched_product_id"] == "prod_001"
+    assert item1["matched_product_name"] == "Coca-Cola 250ml"
+    assert item1["match_status"] == "EXACT"
+    assert item1["quantity"] == 3
+    assert item1["selling_price"] == 20.0
+    assert item1["purchase_price"] == 15.0
+    assert item1["line_total"] == 60.0
+
+    item2 = res["items"][1]
+    assert item2["matched_product_id"] == "prod_002"
+    assert item2["matched_product_name"] == "Lays Classic Salted 50g"
+    assert item2["match_status"] == "EXACT"
+    assert item2["quantity"] == 2
+    assert item2["selling_price"] == 20.0
+    assert item2["purchase_price"] == 16.0
+    assert item2["line_total"] == 40.0
+
     assert res["estimated_total"] == 100.00  # (3*20) + (2*20) = 100
     assert res["estimated_profit"] == 23.00  # 3*(20-15) + 2*(20-16) = 15 + 8 = 23
 
 
 # 2. Integration Tests via API Client
+
+def test_sales_parse_api_exact_coca_cola_lays_phrase():
+    parse_res = client.post("/api/sales/parse", json={"text": "Sold 3 Coca-Cola 250ml and 2 Lays Classic Salted 50g"})
+    assert parse_res.status_code == 200
+    data = parse_res.json()
+
+    assert data["requires_review"] == False
+    assert len(data["items"]) == 2
+
+    item1 = data["items"][0]
+    assert item1["matched_product_id"] == "prod_001"
+    assert item1["matched_product_name"] == "Coca-Cola 250ml"
+    assert item1["match_status"] == "EXACT"
+    assert item1["quantity"] == 3
+    assert item1["selling_price"] == 20.0
+    assert item1["purchase_price"] == 15.0
+    assert item1["line_total"] == 60.0
+
+    item2 = data["items"][1]
+    assert item2["matched_product_id"] == "prod_002"
+    assert item2["matched_product_name"] == "Lays Classic Salted 50g"
+    assert item2["match_status"] == "EXACT"
+    assert item2["quantity"] == 2
+    assert item2["selling_price"] == 20.0
+    assert item2["purchase_price"] == 16.0
+    assert item2["line_total"] == 40.0
+
+    assert data["estimated_total"] == 100.00
+    assert data["estimated_profit"] == 23.00
 
 def test_sales_parse_api_does_not_modify_inventory():
     inv_before = client.get("/api/inventory").json()

@@ -2,7 +2,23 @@ import React, { useState } from 'react'
 import { CheckCircle, AlertTriangle, Trash2, ArrowLeft, ShieldCheck, HelpCircle } from 'lucide-react'
 
 export default function SaleReview({ parseData, products, onConfirmSuccess, onBack }) {
-  const [items, setItems] = useState(parseData.items || [])
+  // Pre-select candidate #1 for ambiguous items while requiring explicit confirmation badge
+  const initialItems = (parseData.items || []).map(item => {
+    if (item.match_status === 'AMBIGUOUS' && item.candidates && item.candidates.length > 0) {
+      const top = item.candidates[0]
+      return {
+        ...item,
+        matched_product_id: top.product_id,
+        matched_product_name: top.name,
+        selling_price: top.selling_price,
+        purchase_price: top.purchase_price || 0,
+        match_status: 'AMBIGUOUS_UNCONFIRMED'
+      }
+    }
+    return item
+  })
+
+  const [items, setItems] = useState(initialItems)
   const [source, setSource] = useState(parseData.mode || 'text')
   const [error, setError] = useState(null)
   const [isConfirming, setIsConfirming] = useState(false)
@@ -16,7 +32,7 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
       updated[index].matched_product_name = selectedProd.product_name || selectedProd.name
       updated[index].selling_price = selectedProd.selling_price
       updated[index].purchase_price = selectedProd.purchase_price
-      updated[index].match_status = 'MATCHED'
+      updated[index].match_status = 'MATCHED'  // User explicitly confirmed selection
       updated[index].line_total = roundVal((Number(updated[index].quantity) || 1) * selectedProd.selling_price)
     } else {
       updated[index].matched_product_id = null
@@ -59,13 +75,13 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
   }
 
   const hasStockError = items.some(item => checkStockWarning(item) !== null)
-  const hasUnmatchedError = items.some(item => !item.matched_product_id || item.match_status !== 'MATCHED')
+  const hasUnmatchedError = items.some(item => !item.matched_product_id || item.match_status === 'NEEDS_MATCH')
 
   const handleConfirmSale = async () => {
     setError(null)
 
     if (hasUnmatchedError) {
-      setError('Please resolve all unmatched or ambiguous products before confirming.')
+      setError('Please resolve all unmatched products before confirming.')
       return
     }
 
@@ -148,6 +164,7 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
           <tbody>
             {items.map((item, idx) => {
               const stockErr = checkStockWarning(item)
+              const isAmbiguous = item.match_status === 'AMBIGUOUS' || item.match_status === 'AMBIGUOUS_UNCONFIRMED'
               return (
                 <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)', background: stockErr ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
                   <td style={{ padding: '0.75rem 1rem', fontWeight: '500' }}>
@@ -155,14 +172,14 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
                   </td>
 
                   <td style={{ padding: '0.75rem 1rem' }}>
-                    {item.match_status === 'MATCHED' && (
+                    {(item.match_status === 'MATCHED' || item.match_status === 'EXACT') && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.2rem 0.5rem', borderRadius: '0.375rem', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)', fontWeight: '600' }}>
                         <CheckCircle size={12} /> Matched
                       </span>
                     )}
-                    {item.match_status === 'AMBIGUOUS' && (
+                    {isAmbiguous && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.2rem 0.5rem', borderRadius: '0.375rem', fontSize: '0.75rem', background: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)', fontWeight: '600' }}>
-                        <HelpCircle size={12} /> Ambiguous
+                        <HelpCircle size={12} /> AMBIGUOUS — PLEASE CONFIRM
                       </span>
                     )}
                     {item.match_status === 'NEEDS_MATCH' && (
@@ -176,7 +193,7 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
                     <select
                       value={item.matched_product_id || ''}
                       onChange={e => handleProductChange(idx, e.target.value)}
-                      style={{ width: '100%', padding: '0.4rem', background: '#0f172a', border: `1px solid ${item.match_status === 'AMBIGUOUS' ? 'var(--accent-amber)' : 'var(--border-color)'}`, borderRadius: '0.375rem', color: 'white', fontSize: '0.85rem' }}
+                      style={{ width: '100%', padding: '0.4rem', background: '#0f172a', border: `1px solid ${isAmbiguous ? 'var(--accent-amber)' : 'var(--border-color)'}`, borderRadius: '0.375rem', color: 'white', fontSize: '0.85rem' }}
                     >
                       <option value="">-- Which product did you mean? --</option>
                       {item.candidates && item.candidates.length > 0 ? (

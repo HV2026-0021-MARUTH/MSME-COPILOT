@@ -49,8 +49,16 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
       setError('Product name is required.')
       return
     }
-    if (Number(formData.purchase_price) < 0 || Number(formData.selling_price) < 0) {
-      setError('Prices cannot be negative.')
+    if (Number(formData.purchase_price) < 0) {
+      setError('Purchase price cannot be negative.')
+      return
+    }
+    if (Number(formData.selling_price) <= 0) {
+      setError('Selling price must be explicitly entered and greater than 0.')
+      return
+    }
+    if (Number(formData.selling_price) < Number(formData.purchase_price)) {
+      setError('Selling price cannot be less than purchase cost.')
       return
     }
     if (Number(formData.reorder_level) < 0) {
@@ -182,11 +190,12 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Selling Price (₹)</label>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Selling Price (₹) *</label>
               <input
                 type="number"
                 step="0.01"
-                min="0"
+                min="0.01"
+                required
                 value={formData.selling_price}
                 onChange={e => setFormData({ ...formData, selling_price: e.target.value })}
                 style={{ width: '100%', padding: '0.5rem 0.75rem', background: '#0f172a', border: '1px solid var(--border-color)', borderRadius: '0.375rem', color: 'white' }}

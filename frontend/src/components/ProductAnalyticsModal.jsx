@@ -128,24 +128,30 @@ export default function ProductAnalyticsModal({ productId, onClose }) {
             {/* Historical Sales Overview */}
             <div>
               <h4 style={{ fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem' }}>Historical Sales Totals</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem', fontSize: '0.85rem', textAlign: 'center', background: '#0f172a', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
-                <div>
-                  <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Units Sold</span>
-                  <strong>{data.units_sold_total}</strong>
+              {data.units_sold_total === 0 ? (
+                <div style={{ background: '#0f172a', padding: '1rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                  No historical sales recorded for this product yet.
                 </div>
-                <div>
-                  <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Total Revenue</span>
-                  <strong style={{ color: 'var(--accent-blue)' }}>₹{data.revenue_total}</strong>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.5rem', fontSize: '0.85rem', textAlign: 'center', background: '#0f172a', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Units Sold</span>
+                    <strong>{data.units_sold_total}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Total Revenue</span>
+                    <strong style={{ color: 'var(--accent-blue)' }}>₹{data.revenue_total}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Total COGS</span>
+                    <strong>₹{data.cost_total}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Total Profit</span>
+                    <strong style={{ color: 'var(--accent-green)' }}>₹{data.profit_total}</strong>
+                  </div>
                 </div>
-                <div>
-                  <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Total COGS</span>
-                  <strong>₹{data.cost_total}</strong>
-                </div>
-                <div>
-                  <span style={{ color: 'var(--text-muted)', display: 'block', fontSize: '0.75rem' }}>Total Profit</span>
-                  <strong style={{ color: 'var(--accent-green)' }}>₹{data.profit_total}</strong>
-                </div>
-              </div>
+              )}
             </div>
 
           </div>

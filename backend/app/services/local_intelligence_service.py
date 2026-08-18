@@ -28,7 +28,7 @@ def resolve_location_3tier(
     if lat is not None and lon is not None:
         return {
             "source": "GPS",
-            "name": f"Ameerpet, Hyderabad (GPS: {round(lat, 4)}, {round(lon, 4)})"
+            "name": f"GPS Location (GPS: {round(lat, 4)}, {round(lon, 4)})"
         }
     elif locality_input and locality_input.strip():
         loc_clean = locality_input.strip()
