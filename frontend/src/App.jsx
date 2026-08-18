@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Store, CheckCircle } from 'lucide-react'
+import { Store, CheckCircle, Sun, Moon } from 'lucide-react'
 import InventoryView from './components/InventoryView'
 import CaptureView from './components/CaptureView'
 import SalesHistoryView from './components/SalesHistoryView'
@@ -12,6 +12,16 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('Dashboard')
   const [healthStatus, setHealthStatus] = useState({ loading: true, data: null, error: null })
   const [products, setProducts] = useState([])
+  const [theme, setTheme] = useState(() => localStorage.getItem('maruthi_theme') || 'dark')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('maruthi_theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
+  }
 
   const fetchProducts = () => {
     fetch('/api/products')
@@ -48,8 +58,30 @@ export default function App() {
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>MARUTHI</h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>AI Retail Copilot for Small Retailers</p>
         </div>
-        <div className="badge" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Store size={14} /> Sri Lakshmi General Store (Ameerpet)
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.4rem 0.8rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border-color)',
+              background: 'var(--bg-card)',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+              fontWeight: '500'
+            }}
+          >
+            {theme === 'dark' ? <Sun size={15} color="var(--accent-amber)" /> : <Moon size={15} color="var(--accent-blue)" />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
+          <div className="badge" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Store size={14} /> Sri Lakshmi General Store (Ameerpet)
+          </div>
         </div>
       </header>
 
