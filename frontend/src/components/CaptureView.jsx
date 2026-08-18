@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState } from 'react'
 import { Camera, Mic, Edit3, UploadCloud, AlertCircle, CheckCircle2, Loader2, FileText, ShoppingBag } from 'lucide-react'
 import InvoiceReview from './InvoiceReview'
@@ -79,7 +80,7 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
       setError(null)
       setSuccessFeedback(null)
 
-      const res = await fetch('/api/sales/parse', {
+      const res = await fetchWithAuth('/api/sales/parse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ shop_id: 'shop_001', text: textToParse.trim() })
@@ -126,7 +127,7 @@ export default function CaptureView({ products, onPurchaseConfirmed }) {
       const formData = new FormData()
       formData.append('file', file)
 
-      const res = await fetch('/api/purchases/invoice', {
+      const res = await fetchWithAuth('/api/purchases/invoice', {
         method: 'POST',
         body: formData
       })

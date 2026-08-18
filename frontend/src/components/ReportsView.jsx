@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState } from 'react'
 import { FileText, Table, Image, Download, CheckCircle, ShieldCheck, Calendar, Loader2 } from 'lucide-react'
 
@@ -12,7 +13,7 @@ export default function ReportsView() {
       setStatusMsg(`Generating verified MARUTHI ${format.toUpperCase()} report...`)
 
       const url = `/api/reports/business/${format}?period=${selectedPeriod}`
-      const response = await fetch(url)
+      const response = await fetchWithAuth(url)
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: Failed to generate ${format} report`)

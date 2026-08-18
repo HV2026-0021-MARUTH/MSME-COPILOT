@@ -1,3 +1,4 @@
+from app.api.deps import get_current_user
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -13,7 +14,7 @@ from app.schemas.analytics import (
     ForecastResponse, ProductDetailAnalytics
 )
 
-router = APIRouter(prefix="/api", tags=["Analytics & Business Intelligence"])
+router = APIRouter(prefix="/api", tags=["Analytics & Business Intelligence"], dependencies=[Depends(get_current_user)])
 
 def build_product_forecast(prod: Product, inv_qty: int, db: Session, today: date) -> ForecastItem:
     """Helper to extract daily sales and compute product forecast."""

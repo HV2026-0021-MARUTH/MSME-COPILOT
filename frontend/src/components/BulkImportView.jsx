@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState } from 'react'
 import { UploadCloud, AlertCircle, CheckCircle2, FileText, Loader2, ArrowRight } from 'lucide-react'
 
@@ -23,7 +24,7 @@ export default function BulkImportView({ onImportComplete }) {
 
     try {
       setLoading(true)
-      const res = await fetch('/api/import/preview', {
+      const res = await fetchWithAuth('/api/import/preview', {
         method: 'POST',
         body: formData
       })
@@ -64,7 +65,7 @@ export default function BulkImportView({ onImportComplete }) {
         new_products_info: newProductsInfo
       }
       
-      const res = await fetch('/api/import/confirm', {
+      const res = await fetchWithAuth('/api/import/confirm', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

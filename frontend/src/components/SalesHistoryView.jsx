@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState, useEffect } from 'react'
 import { ShoppingBag, Mic, Edit3, Keyboard, Clock, IndianRupee } from 'lucide-react'
 
@@ -9,7 +10,7 @@ export default function SalesHistoryView() {
   const fetchSalesHistory = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/sales')
+      const res = await fetchWithAuth('/api/sales')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setSales(data)

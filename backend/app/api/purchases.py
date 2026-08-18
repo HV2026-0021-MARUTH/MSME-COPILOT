@@ -1,3 +1,4 @@
+from app.api.deps import get_current_user
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from sqlalchemy.orm import Session
@@ -9,7 +10,7 @@ from app.schemas.inventory import InvoiceExtractionResult, ProductCreate
 from app.services.invoice_parser import parse_invoice_image
 from app.services.analytics import update_inventory_on_purchase
 
-router = APIRouter(prefix="/api/purchases", tags=["Purchases"])
+router = APIRouter(prefix="/api/purchases", tags=["Purchases"], dependencies=[Depends(get_current_user)])
 
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/jpg", "image/png", "image/webp"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB

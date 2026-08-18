@@ -1,3 +1,4 @@
+import { fetchWithAuth } from './lib/api';
 import React, { useState, useEffect } from 'react'
 import { Store, CheckCircle, Sun, Moon } from 'lucide-react'
 import InventoryView from './components/InventoryView'
@@ -27,14 +28,14 @@ export default function App() {
   }
 
   const fetchProducts = () => {
-    fetch('/api/products')
+    fetchWithAuth('/api/products')
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error('Products fetch error:', err))
   }
 
   useEffect(() => {
-    fetch('/api/health')
+    fetchWithAuth('/api/health')
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         return res.json()
@@ -121,7 +122,7 @@ export default function App() {
       </header>
 
       {/* Bypassed Auth for local development */}
-      {false ? (
+      {!session ? (
         <Auth onLogin={setSession} />
       ) : (
         <>

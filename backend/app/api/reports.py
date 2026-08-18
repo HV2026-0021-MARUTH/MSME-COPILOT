@@ -1,3 +1,4 @@
+from app.api.deps import get_current_user
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.orm import Session
 from app.db.database import get_db
@@ -5,7 +6,7 @@ from app.services.report_service import (
     collect_report_data, generate_pdf_report, generate_xlsx_report, generate_png_report
 )
 
-router = APIRouter(prefix="/api/reports", tags=["Business Reports"])
+router = APIRouter(prefix="/api/reports", tags=["Business Reports"], dependencies=[Depends(get_current_user)])
 
 @router.get("/business/pdf")
 @router.get("/pdf")

@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 
@@ -81,7 +82,7 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
         reorder_level: Number(formData.reorder_level)
       }
 
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

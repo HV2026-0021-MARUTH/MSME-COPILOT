@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState } from 'react'
 import { CheckCircle, AlertTriangle, Trash2, ArrowLeft, ShieldCheck, HelpCircle } from 'lucide-react'
 
@@ -101,7 +102,7 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
         }))
       }
 
-      const res = await fetch('/api/sales/confirm', {
+      const res = await fetchWithAuth('/api/sales/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

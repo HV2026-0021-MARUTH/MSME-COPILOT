@@ -1,3 +1,4 @@
+from app.api.deps import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
@@ -10,7 +11,7 @@ from app.services.seasonal_service import (
 )
 from app.services.local_intelligence_service import generate_grounded_local_intelligence
 
-router = APIRouter(prefix="/api/intelligence", tags=["Seasonal & Local Intelligence"])
+router = APIRouter(prefix="/api/intelligence", tags=["Seasonal & Local Intelligence"], dependencies=[Depends(get_current_user)])
 
 @router.get("/seasonal")
 def get_seasonal_intelligence():

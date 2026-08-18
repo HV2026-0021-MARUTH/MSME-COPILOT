@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState } from 'react'
 import { CheckCircle, AlertTriangle, Trash2, Plus, ArrowLeft, ShieldCheck, Cpu } from 'lucide-react'
 import ProductFormModal from './ProductFormModal'
@@ -94,7 +95,7 @@ export default function InvoiceReview({ extractionData, products, onConfirmSucce
         }))
       }
 
-      const res = await fetch('/api/purchases/confirm', {
+      const res = await fetchWithAuth('/api/purchases/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

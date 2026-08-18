@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState, useEffect } from 'react'
 import { MapPin, Calendar, Sun, CloudRain, AlertOctagon, TrendingUp, Package, ShieldCheck, Search, Loader2 } from 'lucide-react'
 
@@ -12,7 +13,7 @@ export default function LocalInsightsView() {
   const fetchIntelligence = async (lat = null, lon = null, manual = null) => {
     try {
       setLoading(true)
-      const res = await fetch('/api/intelligence/local', {
+      const res = await fetchWithAuth('/api/intelligence/local', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState, useEffect } from 'react'
 import { X, TrendingUp, AlertTriangle, CheckCircle, Package, ShieldAlert, ArrowUpRight } from 'lucide-react'
 
@@ -9,7 +10,7 @@ export default function ProductAnalyticsModal({ productId, onClose }) {
   useEffect(() => {
     if (!productId) return
     setLoading(true)
-    fetch(`/api/analytics/products/${productId}`)
+    fetchWithAuth(`/api/analytics/products/${productId}`)
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         return res.json()

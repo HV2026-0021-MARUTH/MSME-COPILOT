@@ -1,3 +1,4 @@
+from app.api.deps import get_current_user
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -9,7 +10,7 @@ from app.schemas.inventory import (
 )
 from app.services.analytics import determine_stock_status, calculate_inventory_value
 
-router = APIRouter(tags=["Inventory & Products"])
+router = APIRouter(tags=["Inventory & Products"], dependencies=[Depends(get_current_user)])
 
 @router.get("/api/products", response_model=List[ProductResponse])
 def get_products(db: Session = Depends(get_db)):

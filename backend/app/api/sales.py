@@ -9,8 +9,9 @@ from app.schemas.sales import (
 )
 from app.services.sales_parser import parse_sales_text
 from app.services.analytics import update_inventory_on_sale
+from app.api.deps import get_current_user
 
-router = APIRouter(prefix="/api/sales", tags=["Sales"])
+router = APIRouter(prefix="/api/sales", tags=["Sales"], dependencies=[Depends(get_current_user)])
 
 @router.post("/parse", response_model=SaleParseResponse)
 def parse_sale(req: SaleParseRequest, db: Session = Depends(get_db)):

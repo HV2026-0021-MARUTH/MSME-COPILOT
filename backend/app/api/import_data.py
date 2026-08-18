@@ -1,3 +1,4 @@
+from app.api.deps import get_current_user
 import os
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
@@ -11,7 +12,7 @@ from datetime import datetime
 import pandas as pd
 import io
 
-router = APIRouter(prefix="/api/import", tags=["Import"])
+router = APIRouter(prefix="/api/import", tags=["Import"], dependencies=[Depends(get_current_user)])
 
 UPLOAD_DIR = "temp_uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)

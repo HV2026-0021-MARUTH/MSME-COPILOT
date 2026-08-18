@@ -1,10 +1,11 @@
+from app.api.deps import get_current_user
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.advisor import TomorrowPlanResponse, AdvisorAskRequest, AdvisorAskResponse
 from app.services.advisor_service import get_tomorrow_action_plan, answer_advisor_question
 
-router = APIRouter(prefix="/api/advisor", tags=["AI Business Advisor"])
+router = APIRouter(prefix="/api/advisor", tags=["AI Business Advisor"], dependencies=[Depends(get_current_user)])
 
 @router.get("/tomorrow", response_model=TomorrowPlanResponse)
 def get_tomorrow_plan(shop_id: str = "shop_001", db: Session = Depends(get_db)):

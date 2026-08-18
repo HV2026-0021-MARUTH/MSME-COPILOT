@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState, useEffect } from 'react'
 import { Bot, Send, AlertTriangle, TrendingUp, Package, CheckCircle, ShieldCheck, HelpCircle, Loader2 } from 'lucide-react'
 
@@ -15,7 +16,7 @@ export default function AdvisorView() {
   const fetchTomorrowPlan = async () => {
     try {
       setLoadingPlan(true)
-      const res = await fetch('/api/advisor/tomorrow')
+      const res = await fetchWithAuth('/api/advisor/tomorrow')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setTomorrowPlan(data)
@@ -39,7 +40,7 @@ export default function AdvisorView() {
       setAskLoading(true)
       setAskError(null)
 
-      const res = await fetch('/api/advisor/ask', {
+      const res = await fetchWithAuth('/api/advisor/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ shop_id: 'shop_001', question: qToSubmit })

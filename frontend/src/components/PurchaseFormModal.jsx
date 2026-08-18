@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
 
@@ -74,7 +75,7 @@ export default function PurchaseFormModal({ isOpen, onClose, onPurchaseSuccess, 
         }))
       }
 
-      const res = await fetch('/api/purchases/manual', {
+      const res = await fetchWithAuth('/api/purchases/manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

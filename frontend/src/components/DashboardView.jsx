@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState, useEffect } from 'react'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -19,9 +20,9 @@ export default function DashboardView() {
     try {
       setLoading(true)
       const [dashRes, trendRes, prodRes] = await Promise.all([
-        fetch('/api/dashboard'),
-        fetch(`/api/analytics/sales-trend?days=${trendDays}`),
-        fetch('/api/analytics/products')
+        fetchWithAuth('/api/dashboard'),
+        fetchWithAuth(`/api/analytics/sales-trend?days=${trendDays}`),
+        fetchWithAuth('/api/analytics/products')
       ])
 
       if (!dashRes.ok || !trendRes.ok || !prodRes.ok) {

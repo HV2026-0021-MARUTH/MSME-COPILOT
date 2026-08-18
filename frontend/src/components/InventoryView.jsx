@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../lib/api';
 import React, { useState, useEffect } from 'react'
 import { Plus, ShoppingCart, Search, Edit3, PackageCheck, AlertTriangle, AlertCircle } from 'lucide-react'
 import ProductFormModal from './ProductFormModal'
@@ -19,7 +20,7 @@ export default function InventoryView({ onInventoryChange }) {
   const fetchInventory = async () => {
     try {
       setLoading(true)
-      const res = await fetch('/api/inventory')
+      const res = await fetchWithAuth('/api/inventory')
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
       setInventory(data)

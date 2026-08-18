@@ -1,5 +1,12 @@
 import pytest
 from app.db.database import init_sqlite_db_and_seed
+from app.main import app
+from app.api.deps import get_current_user
+
+def mock_get_current_user():
+    return {"id": "test-user-id", "email": "test@example.com"}
+
+app.dependency_overrides[get_current_user] = mock_get_current_user
 
 @pytest.fixture(autouse=True, scope="function")
 def setup_test_database():

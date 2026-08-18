@@ -1,3 +1,4 @@
+from app.api.deps import get_current_user
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -8,7 +9,7 @@ from app.db.models import Sale, SaleItem, Product, Inventory
 from app.services.forecasting import calculate_forecast_for_product
 from app.schemas.analytics import DashboardSummaryResponse, SlowMovingProductItem, ForecastItem
 
-router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
+router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"], dependencies=[Depends(get_current_user)])
 
 def build_product_forecast_internal(prod: Product, inv_qty: int, db: Session, today: date) -> ForecastItem:
     sales_query = db.query(

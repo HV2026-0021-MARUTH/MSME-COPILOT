@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./maruthi.db"
     OPENAI_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
+    SUPABASE_URL: str = ""
+    SUPABASE_SECRET_KEY: str = ""
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"),
