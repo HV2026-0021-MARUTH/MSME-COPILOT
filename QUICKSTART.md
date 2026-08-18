@@ -127,3 +127,23 @@ npm run build
 - **Port 8000 in use**: Run `uvicorn app.main:app --port 8005` and update `frontend/vite.config.js` proxy target.
 - **Node version mismatch**: Ensure Node.js is v18 or newer (`node -v`).
 - **Python missing packages**: Ensure virtual environment is activated before running `pip install -r requirements.txt`.
+
+---
+
+## 🔮 Future Scope & Scalability Roadmap
+
+> [!NOTE]
+> *The features listed under **NEXT**, **SCALE**, and **VISION** represent future product roadmap capabilities and are not part of the current working hackathon MVP.*
+
+### 1. TODAY — WORKING MVP (Implemented Capabilities)
+- Natural sales capture, invoice OCR parsing, deterministic financial engine, real-time BI dashboard, demand forecasting, grounded AI advisor, local/seasonal intel, verifiable PDF/XLSX/PNG reports, 83/83 Pytests passing.
+
+### 2. NEXT — PRODUCT SCALE (Future Roadmap)
+- PostgreSQL/Supabase cloud DB deployment, multi-shop tenant isolation & RBAC auth, Indian regional language support (Hindi, Telugu, Tamil, etc.), offline-first PWA IndexedDB sync.
+
+### 3. SCALE — RETAIL ECOSYSTEM (Future Roadmap)
+- Automated wholesale purchase-order workflows, WhatsApp Business voice-bot integration, POS & payment gateway (UPI/Tally/Zoho) integrations.
+
+### 4. VISION — "AI Operating System for Small Retailers"
+- Positioning MARUTHI as an end-to-end AI OS where small Kirana retailers manage sales, stock, demand forecasting, and supplier ordering seamlessly via voice and mobile.
+
