@@ -1,3 +1,8 @@
+databases:
+  - name: msme-db
+    databaseName: msme_production
+    user: msme_user
+
 services:
   - type: web
     name: msme-bi-backend
@@ -8,7 +13,9 @@ services:
       - key: PYTHON_VERSION
         value: 3.10.0
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: msme-db
+          property: connectionString
       - key: OPENAI_API_KEY
         sync: false
       - key: GEMINI_API_KEY
