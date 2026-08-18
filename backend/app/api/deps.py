@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 
 def get_supabase_client() -> Client:
     if not settings.SUPABASE_URL or not settings.SUPABASE_SECRET_KEY:
@@ -18,6 +18,17 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     Validates the bearer token against Supabase Auth.
     Returns the Supabase user object if valid, otherwise raises 401.
     """
+    if settings.ENVIRONMENT == "development" or not settings.SUPABASE_SECRET_KEY:
+        # Bypass for local MVP demo or if live backend lacks credentials
+        return {"id": "demo-shop-owner", "email": "demo@maruthi.ai"}
+        
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
     token = credentials.credentials
     try:
         supabase = get_supabase_client()

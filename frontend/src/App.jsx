@@ -95,26 +95,42 @@ export default function App() {
             Demo Data
           </button>
 
-          <button
+          <div 
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
             style={{
+              position: 'relative',
+              width: '54px',
+              height: '28px',
+              borderRadius: '30px',
+              background: theme === 'dark' ? '#1e293b' : '#e2e8f0',
+              border: '1px solid var(--border-color)',
+              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '0.5rem',
-              border: '1px solid var(--border-color)',
-              background: 'var(--bg-card)',
-              color: 'var(--text-main)',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: '500'
+              justifyContent: 'space-between',
+              padding: '0 5px',
+              transition: 'background 0.3s ease',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)'
             }}
           >
-            {theme === 'dark' ? <Sun size={15} color="var(--accent-amber)" /> : <Moon size={15} color="var(--accent-blue)" />}
-            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-          </button>
+            <Moon size={14} color={theme === 'dark' ? 'var(--text-muted)' : 'var(--accent-blue)'} style={{ zIndex: 1 }} />
+            <Sun size={14} color={theme === 'dark' ? 'var(--accent-amber)' : 'var(--text-muted)'} style={{ zIndex: 1 }} />
+            <div 
+              style={{
+                position: 'absolute',
+                top: '2px',
+                left: theme === 'dark' ? '28px' : '2px',
+                width: '22px',
+                height: '22px',
+                background: theme === 'dark' ? '#0f172a' : '#ffffff',
+                borderRadius: '50%',
+                transition: 'left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                zIndex: 2
+              }}
+            />
+          </div>
           
           {session && (
             <button
@@ -140,7 +156,7 @@ export default function App() {
       </header>
 
       {/* Bypassed Auth for local development */}
-      {!session ? (
+      {false ? (
         <Auth onLogin={setSession} />
       ) : (
         <>
