@@ -3,6 +3,7 @@
 **Problem Statement ID**: HV-MSME-05  
 **Title**: MSME Business Intelligence Dashboard with Sales Analysis & Demand Forecasting  
 **Domain**: Smart Manufacturing, MSMEs & Industry 6.0  
+**Documentation**: 📖 [Comprehensive Hackathon Q&A & Judge Defense Guide](docs/QA.md)
 
 ---
 
