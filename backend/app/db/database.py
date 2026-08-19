@@ -68,7 +68,7 @@ def init_sqlite_db_and_seed(db_engine=engine):
             ]
             for p_id, p_name, cat, brand, unit, p_price, s_price, reorder in products_data:
                 db.add(Product(
-                    id=p_id, name=p_name, category=cat, brand=brand, unit=unit,
+                    id=p_id, shop_id="shop_001", sku=f"SKU-{p_id}", name=p_name, category=cat, brand=brand, unit=unit,
                     purchase_price=p_price, selling_price=s_price, reorder_level=reorder
                 ))
 

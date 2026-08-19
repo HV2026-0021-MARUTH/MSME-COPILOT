@@ -1,22 +1,51 @@
 :root {
+  /* Dark Theme Default */
   --bg-primary: #0f172a;
-  --bg-card: #1e293b;
-  --border-color: #334155;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --border-color: rgba(255, 255, 255, 0.1);
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
+  
   --accent-green: #10b981;
   --accent-amber: #f59e0b;
   --accent-red: #ef4444;
   --accent-blue: #3b82f6;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --accent-purple: #8b5cf6;
+  
+  --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+  
+  --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+  --glass-bg: rgba(30, 41, 59, 0.6);
+  --glass-blur: blur(12px);
+
+  font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
 }
 
 [data-theme="light"] {
+  /* Light Theme Overhaul */
   --bg-primary: #f8fafc;
-  --bg-card: #ffffff;
-  --border-color: #e2e8f0;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --border-color: rgba(0, 0, 0, 0.08);
   --text-main: #0f172a;
   --text-muted: #64748b;
+  
+  --accent-green: #059669;
+  --accent-amber: #d97706;
+  --accent-red: #dc2626;
+  --accent-blue: #2563eb;
+  --accent-purple: #7c3aed;
+
+  --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.12);
+  
+  --glass-border: 1px solid rgba(255, 255, 255, 0.6);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-blur: blur(16px);
 }
 
 * {
@@ -26,87 +55,153 @@
 }
 
 html, body {
-  background-color: var(--bg-primary);
+  background: var(--bg-primary);
+  background-image: var(--gradient-bg);
+  background-attachment: fixed;
   color: var(--text-main);
-  line-height: 1.5;
+  line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background 0.4s ease, color 0.4s ease;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
 }
 
+/* Glassmorphism Header */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--border-color);
-  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 1rem;
+  margin-bottom: 2rem;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
 }
 
 .badge {
-  background: #064e3b;
-  color: #6ee7b7;
-  padding: 0.35rem 0.75rem;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+  padding: 0.4rem 0.85rem;
   border-radius: 9999px;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  backdrop-filter: blur(4px);
 }
 
+/* Segmented Control for Navigation Tabs */
 .nav-tabs {
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 1rem;
   -webkit-overflow-scrolling: touch;
+  backdrop-filter: blur(8px);
+}
+[data-theme="dark"] .nav-tabs {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .nav-tab {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: transparent;
+  border: none;
   color: var(--text-muted);
-  padding: 0.6rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
   cursor: pointer;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 500;
   min-height: 40px;
   display: inline-flex;
   align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-tab:hover:not(.active) {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-main);
 }
 
 .nav-tab.active {
   background: var(--accent-blue);
+  background: linear-gradient(135deg, var(--accent-blue) 0%, #6366f1 100%);
   color: white;
-  border-color: var(--accent-blue);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transform: scale(1.02);
 }
 
+/* Premium Cards */
 .card {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
+  border: var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* Status Box */
 .status-box {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.75rem;
   background: rgba(16, 185, 129, 0.1);
-  border: 1px solid var(--accent-green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   color: var(--accent-green);
   font-size: 0.9rem;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+button:active {
+  transform: scale(0.96);
+}
+
+/* Modern inputs */
+input, select {
+  font-family: inherit;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
 /* Responsive mobile adjustments */
@@ -117,9 +212,20 @@ header {
   header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 1rem;
+    border-radius: 0.75rem;
   }
   .card {
     padding: 1rem;
+    border-radius: 1rem;
+  }
+  .nav-tabs {
+    padding: 0.25rem;
+    border-radius: 0.75rem;
+  }
+  .nav-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
   }
 }
 

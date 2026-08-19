@@ -23,7 +23,7 @@ def test_exact_product_matching():
     res = match_single_product("Coca-Cola 250ml", products)
     assert res["match_status"] == "MATCHED"
     assert res["matched_product_id"] == "prod_001"
-    assert res["confidence"] == 0.98
+    assert res["confidence"] == 1.0
 
 def test_normalized_product_matching():
     products = [DummyProduct("prod_001", "Coca-Cola 250ml")]

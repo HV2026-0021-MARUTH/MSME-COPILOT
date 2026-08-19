@@ -19,6 +19,14 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('maruthi_theme') || 'dark')
 
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [activeShop, setActiveShop] = useState(() => localStorage.getItem('maruthi_active_shop') || 'shop_001');
+
+  const handleShopChange = (e) => {
+    const newShopId = e.target.value;
+    localStorage.setItem('maruthi_active_shop', newShopId);
+    setActiveShop(newShopId);
+    window.location.reload();
+  };
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -75,11 +83,37 @@ export default function App() {
     <div className="container">
       <header>
         <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700' }}>MARUTHI</h1>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>AI Retail Copilot for Small Retailers</p>
+          <h1 style={{ 
+            fontSize: '1.75rem', 
+            fontWeight: '800', 
+            letterSpacing: '-0.025em',
+            background: 'linear-gradient(to right, var(--accent-blue), var(--accent-purple))',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            display: 'inline-block'
+          }}>MARUTHI</h1>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>AI Retail Copilot for Small Retailers</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           
+          <select 
+            value={activeShop} 
+            onChange={handleShopChange}
+            style={{
+              padding: '0.4rem 0.8rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border-color)',
+              background: 'var(--card-bg)',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
+              fontSize: '0.85rem'
+            }}
+          >
+            <option value="shop_001">Lakshmi Kirana (Grocery)</option>
+            <option value="shop_002">Fashion Hub (Clothing)</option>
+            <option value="shop_003">Ravi Hardware (Hardware)</option>
+            <option value="shop_004">Sri Sai (General)</option>
+          </select>
           <button
             onClick={() => setShowDemoModal(true)}
             style={{

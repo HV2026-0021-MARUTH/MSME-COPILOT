@@ -13,19 +13,19 @@ from app.services.analytics import determine_stock_status, calculate_inventory_v
 router = APIRouter(tags=["Inventory & Products"], dependencies=[Depends(get_current_user)])
 
 @router.get("/api/products", response_model=List[ProductResponse])
-def get_products(db: Session = Depends(get_db)):
-    products = db.query(Product).order_by(Product.name.asc()).all()
+def get_products(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    products = db.query(Product).filter(Product.shop_id == current_user["shop_id"]).order_by(Product.name.asc()).all()
     return products
 
 @router.get("/api/products/{product_id}", response_model=ProductResponse)
-def get_product_by_id(product_id: str, db: Session = Depends(get_db)):
-    product = db.query(Product).filter(Product.id == product_id).first()
+def get_product_by_id(product_id: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    product = db.query(Product).filter(Product.id == product_id, Product.shop_id == current_user["shop_id"]).first()
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Product with id '{product_id}' not found")
     return product
 
 @router.post("/api/products", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
-def create_product(product_in: ProductCreate, db: Session = Depends(get_db)):
+def create_product(product_in: ProductCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # Validate fields
     if not product_in.name or not product_in.name.strip():
         raise HTTPException(status_code=400, detail="Product name is required")
@@ -37,6 +37,8 @@ def create_product(product_in: ProductCreate, db: Session = Depends(get_db)):
     prod_id = f"prod_{uuid.uuid4().hex[:8]}"
     product = Product(
         id=prod_id,
+        shop_id=current_user["shop_id"],
+        sku=f"SKU-{prod_id[-6:].upper()}",
         name=product_in.name.strip(),
         category=product_in.category.strip(),
         brand=product_in.brand.strip() if product_in.brand else None,
@@ -47,8 +49,8 @@ def create_product(product_in: ProductCreate, db: Session = Depends(get_db)):
     )
     db.add(product)
 
-    # Initialize inventory record for default shop if it doesn't exist
-    inv = Inventory(id=f"inv_{uuid.uuid4().hex[:8]}", shop_id="shop_001", product_id=prod_id, quantity=0)
+    # Initialize inventory record for the active shop
+    inv = Inventory(id=f"inv_{uuid.uuid4().hex[:8]}", shop_id=current_user["shop_id"], product_id=prod_id, quantity=0)
     db.add(inv)
 
     db.commit()
@@ -56,8 +58,8 @@ def create_product(product_in: ProductCreate, db: Session = Depends(get_db)):
     return product
 
 @router.put("/api/products/{product_id}", response_model=ProductResponse)
-def update_product(product_id: str, product_in: ProductUpdate, db: Session = Depends(get_db)):
-    product = db.query(Product).filter(Product.id == product_id).first()
+def update_product(product_id: str, product_in: ProductUpdate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    product = db.query(Product).filter(Product.id == product_id, Product.shop_id == current_user["shop_id"]).first()
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Product with id '{product_id}' not found")
 
@@ -97,8 +99,8 @@ def update_product(product_id: str, product_in: ProductUpdate, db: Session = Dep
     return product
 
 @router.get("/api/inventory", response_model=List[InventoryItemResponse])
-def get_inventory(shop_id: str = "shop_001", db: Session = Depends(get_db)):
-    items = db.query(Inventory).join(Product).filter(Inventory.shop_id == shop_id).all()
+def get_inventory(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    items = db.query(Inventory).join(Product).filter(Inventory.shop_id == current_user["shop_id"]).all()
     res = []
     for item in items:
         p_price = float(item.product.purchase_price)

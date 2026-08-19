@@ -24,13 +24,17 @@ class Shop(Base):
     sales = relationship("Sale", back_populates="shop", cascade="all, delete-orphan")
     purchases = relationship("Purchase", back_populates="shop", cascade="all, delete-orphan")
     insights = relationship("BusinessInsight", back_populates="shop", cascade="all, delete-orphan")
+    products = relationship("Product", back_populates="shop", cascade="all, delete-orphan")
 
 
 class Product(Base):
     __tablename__ = "products"
 
     id = Column(String(36), primary_key=True)
+    shop_id = Column(String(36), ForeignKey("shops.id", ondelete="CASCADE"), nullable=False)
+    sku = Column(String(100), nullable=True)
     name = Column(String(255), nullable=False)
+    aliases = Column(String(500), nullable=True)
     category = Column(String(100), nullable=False)
     brand = Column(String(100), nullable=True)
     unit = Column(String(50), default="unit")
@@ -39,6 +43,11 @@ class Product(Base):
     reorder_level = Column(Integer, nullable=False, default=10)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+    __table_args__ = (
+        UniqueConstraint("shop_id", "sku", name="unique_shop_sku"),
+    )
+
+    shop = relationship("Shop", back_populates="products")
     inventory_items = relationship("Inventory", back_populates="product", cascade="all, delete-orphan")
 
 

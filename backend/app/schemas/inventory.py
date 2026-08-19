@@ -8,7 +8,9 @@ class StockStatusEnum(str, Enum):
     HEALTHY = "HEALTHY"
 
 class ProductBase(BaseModel):
+    sku: Optional[str] = None
     name: str = Field(..., min_length=1, description="Product name is required")
+    aliases: Optional[str] = None
     category: str = Field(..., min_length=1, description="Category is required")
     brand: Optional[str] = None
     unit: str = "unit"
@@ -20,7 +22,9 @@ class ProductCreate(ProductBase):
     pass
 
 class ProductUpdate(BaseModel):
+    sku: Optional[str] = None
     name: Optional[str] = Field(None, min_length=1)
+    aliases: Optional[str] = None
     category: Optional[str] = Field(None, min_length=1)
     brand: Optional[str] = None
     unit: Optional[str] = None
@@ -36,7 +40,9 @@ class ProductResponse(ProductBase):
 class InventoryItemResponse(BaseModel):
     id: str
     product_id: str
+    sku: Optional[str] = None
     product_name: str
+    aliases: Optional[str] = None
     category: str
     brand: Optional[str] = None
     unit: str
@@ -58,6 +64,9 @@ class ExtractedInvoiceItem(BaseModel):
     match_status: str  # "MATCHED" or "NEEDS_MATCH"
     matched_product_id: Optional[str] = None
     matched_product_name: Optional[str] = None
+    match_type: Optional[str] = None
+    sku: Optional[str] = None
+    aliases: Optional[str] = None
     confidence: float
 
 class InvoiceExtractionResult(BaseModel):

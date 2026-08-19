@@ -136,7 +136,7 @@ npm run build
 > *The features listed under **NEXT**, **SCALE**, and **VISION** represent future product roadmap capabilities and are not part of the current working hackathon MVP.*
 
 ### 1. TODAY — WORKING MVP (Implemented Capabilities)
-- Natural sales capture, invoice OCR parsing, deterministic financial engine, real-time BI dashboard, demand forecasting, grounded AI advisor, local/seasonal intel, verifiable PDF/XLSX/PNG reports, 83/83 Pytests passing.
+- Product Identity/SKU system, Natural sales capture, invoice OCR parsing, deterministic financial engine, real-time BI dashboard, demand forecasting, grounded AI advisor, local/seasonal intel, verifiable PDF/XLSX/PNG reports, 83/83 Pytests passing.
 
 ### 2. NEXT — PRODUCT SCALE (Future Roadmap)
 - PostgreSQL/Supabase cloud DB deployment, multi-shop tenant isolation & RBAC auth, Indian regional language support (Hindi, Telugu, Tamil, etc.), offline-first PWA IndexedDB sync.

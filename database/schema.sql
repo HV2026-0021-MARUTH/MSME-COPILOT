@@ -16,14 +16,18 @@ CREATE TABLE IF NOT EXISTS shops (
 -- 2. Products
 CREATE TABLE IF NOT EXISTS products (
     id VARCHAR(36) PRIMARY KEY,
+    shop_id VARCHAR(36) NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+    sku VARCHAR(100) NOT NULL,
     name VARCHAR(255) NOT NULL,
+    aliases VARCHAR(500),
     category VARCHAR(100) NOT NULL,
     brand VARCHAR(100),
     unit VARCHAR(50) DEFAULT 'unit',
     purchase_price DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     selling_price DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     reorder_level INT NOT NULL DEFAULT 10,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_shop_sku UNIQUE (shop_id, sku)
 );
 
 -- 3. Inventory

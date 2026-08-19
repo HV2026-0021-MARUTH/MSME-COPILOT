@@ -15,16 +15,16 @@ VALUES (
 ) ON CONFLICT (id) DO NOTHING;
 
 -- 2. Demo Products
-INSERT INTO products (id, name, category, brand, unit, purchase_price, selling_price, reorder_level, created_at)
+INSERT INTO products (id, shop_id, sku, name, category, brand, unit, purchase_price, selling_price, reorder_level, created_at)
 VALUES
-    ('prod_001', 'Coca-Cola 250ml', 'Beverages', 'Coca-Cola', 'bottle', 15.00, 20.00, 15, CURRENT_TIMESTAMP),
-    ('prod_002', 'Lays Classic Salted 50g', 'Snacks', 'Lays', 'pack', 16.00, 20.00, 20, CURRENT_TIMESTAMP),
-    ('prod_003', 'Amul Taaza Milk 500ml', 'Dairy', 'Amul', 'packet', 24.00, 27.00, 10, CURRENT_TIMESTAMP),
-    ('prod_004', 'Tata Salt 1kg', 'Staples', 'Tata', 'pack', 22.00, 28.00, 10, CURRENT_TIMESTAMP),
-    ('prod_005', 'Surf Excel Easy Wash 500g', 'Personal & Home Care', 'Unilever', 'pack', 62.00, 72.00, 5, CURRENT_TIMESTAMP),
-    ('prod_006', 'Thums Up 750ml', 'Beverages', 'Coca-Cola', 'bottle', 32.00, 40.00, 12, CURRENT_TIMESTAMP),
-    ('prod_007', 'Parle-G Gold 100g', 'Snacks', 'Parle', 'pack', 8.50, 10.00, 25, CURRENT_TIMESTAMP),
-    ('prod_008', 'Maggi 2-Min Noodles 70g', 'Snacks', 'Nestle', 'pack', 11.50, 14.00, 20, CURRENT_TIMESTAMP)
+    ('prod_001', 'shop_001', 'SKU-001', 'Coca-Cola 250ml', 'Beverages', 'Coca-Cola', 'bottle', 15.00, 20.00, 15, CURRENT_TIMESTAMP),
+    ('prod_002', 'shop_001', 'SKU-002', 'Lays Classic Salted 50g', 'Snacks', 'Lays', 'pack', 16.00, 20.00, 20, CURRENT_TIMESTAMP),
+    ('prod_003', 'shop_001', 'SKU-003', 'Amul Taaza Milk 500ml', 'Dairy', 'Amul', 'packet', 24.00, 27.00, 10, CURRENT_TIMESTAMP),
+    ('prod_004', 'shop_001', 'SKU-004', 'Tata Salt 1kg', 'Staples', 'Tata', 'pack', 22.00, 28.00, 10, CURRENT_TIMESTAMP),
+    ('prod_005', 'shop_001', 'SKU-005', 'Surf Excel Easy Wash 500g', 'Personal & Home Care', 'Unilever', 'pack', 62.00, 72.00, 5, CURRENT_TIMESTAMP),
+    ('prod_006', 'shop_001', 'SKU-006', 'Thums Up 750ml', 'Beverages', 'Coca-Cola', 'bottle', 32.00, 40.00, 12, CURRENT_TIMESTAMP),
+    ('prod_007', 'shop_001', 'SKU-007', 'Parle-G Gold 100g', 'Snacks', 'Parle', 'pack', 8.50, 10.00, 25, CURRENT_TIMESTAMP),
+    ('prod_008', 'shop_001', 'SKU-008', 'Maggi 2-Min Noodles 70g', 'Snacks', 'Nestle', 'pack', 11.50, 14.00, 20, CURRENT_TIMESTAMP)
 ON CONFLICT (id) DO NOTHING;
 
 -- 3. Initial Inventory

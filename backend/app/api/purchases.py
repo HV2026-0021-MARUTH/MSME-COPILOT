@@ -23,7 +23,6 @@ class ConfirmedPurchaseItemInput(BaseModel):
     new_product: Optional[ProductCreate] = None
 
 class PurchaseConfirmPayload(BaseModel):
-    shop_id: str = "shop_001"
     supplier_name: Optional[str] = "Supplier"
     invoice_number: Optional[str] = None
     invoice_date: Optional[str] = None
@@ -33,9 +32,10 @@ class PurchaseConfirmPayload(BaseModel):
 @router.post("/invoice", response_model=InvoiceExtractionResult)
 async def upload_and_extract_invoice(
     file: UploadFile = File(...),
-    shop_id: str = "shop_001",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
+    shop_id = current_user["shop_id"]
     # 1. Validate File MIME Type
     if file.content_type not in ALLOWED_MIME_TYPES and not file.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
         raise HTTPException(
@@ -55,7 +55,7 @@ async def upload_and_extract_invoice(
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
     # 3. Fetch existing products for matching
-    db_products = db.query(Product).all()
+    db_products = db.query(Product).filter(Product.shop_id == shop_id).all()
 
     # 4. Perform AI / OCR Extraction & Product Matching (Does NOT modify inventory)
     extraction = parse_invoice_image(
@@ -76,16 +76,19 @@ async def upload_and_extract_invoice(
 
     return extraction
 
-@router.post("/manual", status_code=status.HTTP_201_CREATED)
-@router.post("/confirm", status_code=status.HTTP_201_CREATED)
-def confirm_purchase_and_update_inventory(req: PurchaseConfirmPayload, db: Session = Depends(get_db)):
+@router.post("/confirm")
+def confirm_purchase(req: PurchaseConfirmPayload, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Finalize the purchase by adding items to inventory.
+    """
+    shop_id = current_user["shop_id"]
     if not req.items:
         raise HTTPException(status_code=400, detail="Purchase items list cannot be empty.")
 
     # Duplicate Protection Check on Confirmation
     if req.invoice_number and not req.force_confirm:
         existing = db.query(Purchase).filter(
-            Purchase.shop_id == req.shop_id,
+            Purchase.shop_id == shop_id,
             Purchase.invoice_number == req.invoice_number
         ).first()
         if existing:
@@ -120,6 +123,8 @@ def confirm_purchase_and_update_inventory(req: PurchaseConfirmPayload, db: Sessi
                 new_prod_id = f"prod_{uuid.uuid4().hex[:8]}"
                 created_prod = Product(
                     id=new_prod_id,
+                    shop_id=shop_id,
+                    sku=f"SKU-{uuid.uuid4().hex[:6].upper()}",
                     name=item.new_product.name.strip(),
                     category=item.new_product.category.strip() if item.new_product.category else "General",
                     brand=item.new_product.brand.strip() if item.new_product.brand else None,
@@ -134,7 +139,7 @@ def confirm_purchase_and_update_inventory(req: PurchaseConfirmPayload, db: Sessi
             if not target_product_id:
                 raise HTTPException(status_code=400, detail=f"Product not selected or created for item '{item.extracted_name or 'Unknown'}'.")
 
-            product = db.query(Product).filter(Product.id == target_product_id).first()
+            product = db.query(Product).filter(Product.id == target_product_id, Product.shop_id == shop_id).first()
             if not product:
                 raise HTTPException(status_code=404, detail=f"Product with id '{target_product_id}' not found.")
 
@@ -143,14 +148,14 @@ def confirm_purchase_and_update_inventory(req: PurchaseConfirmPayload, db: Sessi
 
             # Fetch inventory record
             inv = db.query(Inventory).filter(
-                Inventory.shop_id == req.shop_id,
+                Inventory.shop_id == shop_id,
                 Inventory.product_id == target_product_id
             ).first()
 
             if not inv:
                 inv = Inventory(
                     id=f"inv_{uuid.uuid4().hex[:8]}",
-                    shop_id=req.shop_id,
+                    shop_id=shop_id,
                     product_id=target_product_id,
                     quantity=item.quantity
                 )
@@ -174,7 +179,7 @@ def confirm_purchase_and_update_inventory(req: PurchaseConfirmPayload, db: Sessi
 
         purchase = Purchase(
             id=purch_id,
-            shop_id=req.shop_id,
+            shop_id=shop_id,
             supplier_name=req.supplier_name or "Supplier",
             invoice_number=req.invoice_number or f"INV-{uuid.uuid4().hex[:6].upper()}",
             total_amount=round(total_amount, 2)

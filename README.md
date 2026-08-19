@@ -111,7 +111,9 @@ npm run build
 > *The features listed under **NEXT**, **SCALE**, and **VISION** represent future product roadmap capabilities and are not part of the current working hackathon MVP.*
 
 ### 1. TODAY — WORKING MVP (Implemented Capabilities)
-- **Natural-Language Sales Capture**: Speech-to-text & NLP phrase parser (`EXACT`, `MATCHED`, `AMBIGUOUS`).
+- **Multi-Business & Multi-Profile Support**: Strict backend tenant isolation via `shop_id` scoping with frontend profile switcher. Each business maintains its own isolated products, inventory, sales, and analytics records.
+- **Product Identity & SKU System**: Deterministic SKU assignment, Alias management, and explainable multi-tier product matching (`Exact SKU`, `Exact Name`, `Alias`, `Fuzzy`).
+- **Natural-Language Sales Capture**: Speech-to-text & NLP phrase parser.
 - **Human Review & Stock Safety**: Explicit transaction review before committing; strict anti-negative stock guard.
 - **AI Wholesale Invoice Ingestion**: Vision & OCR invoice parser with duplicate invoice protection & new product modal validation.
 - **Deterministic Financial Engine**: Pure server-side calculations for Revenue, COGS, Gross Profit, and Gross Margin %.
@@ -125,7 +127,6 @@ npm run build
 
 ### 2. NEXT — PRODUCT SCALE (Future Roadmap)
 - **Cloud Database Deployment**: Migration from zero-setup SQLite to PostgreSQL / Supabase cloud database (`schema.sql` ready).
-- **Multi-Shop Architecture**: Tenant isolation, multi-store support, and role-based access control (RBAC).
 - **Multilingual Local Support**: Indian regional language support (Hindi, Telugu, Tamil, Kannada, Marathi, etc.).
 - **Offline-First PWA Sync**: Local IndexedDB caching with background server synchronization for poor-connectivity Kirana environments.
 - **Advanced Model Routing**: Dynamic AI provider fallback and cost-optimized prompt routing.

@@ -11,6 +11,9 @@ export async function fetchWithAuth(url, options = {}) {
     headers['Authorization'] = `Bearer ${session.access_token}`
   }
 
+  const shopId = localStorage.getItem('maruthi_active_shop') || 'shop_001'
+  headers['X-Shop-ID'] = shopId
+
   return fetch(url, {
     ...options,
     headers,

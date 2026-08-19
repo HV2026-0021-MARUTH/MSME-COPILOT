@@ -65,6 +65,8 @@ def confirm_import(payload: ImportConfirmPayload, db: Session = Depends(get_db))
             if p_name_lower not in product_map:
                 new_p = Product(
                     id=f"prod_{uuid.uuid4().hex[:8]}",
+                    shop_id=payload.shop_id,
+                    sku=f"SKU-{uuid.uuid4().hex[:6].upper()}",
                     name=p_info.name.strip(),
                     category=p_info.category,
                     selling_price=p_info.selling_price,

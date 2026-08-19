@@ -36,38 +36,75 @@ def match_single_product(extracted_name: str, db_products: List[Any]) -> Dict[st
 
     best_match = None
     highest_score = 0.0
+    match_type = "fuzzy"
 
     for prod in db_products:
         prod_name = prod.name.strip()
         norm_prod = normalize_string(prod_name)
+        prod_sku = getattr(prod, "sku", "") or ""
+        norm_sku = normalize_string(prod_sku)
+        prod_aliases = getattr(prod, "aliases", "") or ""
+        aliases_list = [normalize_string(a.strip()) for a in prod_aliases.split(',') if a.strip()]
 
-        # 1. Exact Match
-        if raw_extracted.lower() == prod_name.lower():
+        # 1. Exact SKU Match
+        if norm_sku and norm_extracted == norm_sku:
             return {
                 "match_status": "MATCHED",
                 "matched_product_id": prod.id,
                 "matched_product_name": prod.name,
-                "confidence": 0.98
+                "sku": prod_sku,
+                "aliases": prod_aliases,
+                "match_type": "exact_sku",
+                "confidence": 1.0
             }
 
-        # 2. Normalized Match
-        if norm_extracted == norm_prod or norm_extracted in norm_prod or norm_prod in norm_extracted:
+        # 2. Exact Name Match
+        if raw_extracted.lower() == prod_name.lower() or norm_extracted == norm_prod:
+            return {
+                "match_status": "MATCHED",
+                "matched_product_id": prod.id,
+                "matched_product_name": prod.name,
+                "sku": prod_sku,
+                "aliases": prod_aliases,
+                "match_type": "exact_name",
+                "confidence": 1.0
+            }
+
+        # 3. Alias Match
+        if norm_extracted in aliases_list:
+            return {
+                "match_status": "MATCHED",
+                "matched_product_id": prod.id,
+                "matched_product_name": prod.name,
+                "sku": prod_sku,
+                "aliases": prod_aliases,
+                "match_type": "alias",
+                "confidence": 0.95
+            }
+
+        # 4. Normalized Match
+        if norm_extracted in norm_prod or norm_prod in norm_extracted:
             score = 0.90
             if score > highest_score:
                 highest_score = score
                 best_match = prod
+                match_type = "fuzzy"
 
-        # 3. Fuzzy Sequence Match
+        # 5. Fuzzy Sequence Match
         similarity = difflib.SequenceMatcher(None, norm_extracted, norm_prod).ratio()
         if similarity > highest_score:
             highest_score = similarity
             best_match = prod
+            match_type = "fuzzy"
 
     if best_match and highest_score >= 0.65:
         return {
             "match_status": "MATCHED",
             "matched_product_id": best_match.id,
             "matched_product_name": best_match.name,
+            "sku": getattr(best_match, "sku", ""),
+            "aliases": getattr(best_match, "aliases", ""),
+            "match_type": match_type,
             "confidence": round(highest_score, 2)
         }
 
@@ -75,6 +112,9 @@ def match_single_product(extracted_name: str, db_products: List[Any]) -> Dict[st
         "match_status": "NEEDS_MATCH",
         "matched_product_id": None,
         "matched_product_name": None,
+        "sku": None,
+        "aliases": None,
+        "match_type": None,
         "confidence": round(highest_score, 2) if highest_score > 0 else 0.0
     }
 
@@ -127,6 +167,9 @@ def parse_invoice_image(image_bytes: bytes, filename: str = "invoice.jpg", db_pr
             "match_status": match_info["match_status"],
             "matched_product_id": match_info["matched_product_id"],
             "matched_product_name": match_info["matched_product_name"],
+            "match_type": match_info.get("match_type"),
+            "sku": match_info.get("sku"),
+            "aliases": match_info.get("aliases"),
             "confidence": match_info["confidence"]
         })
 

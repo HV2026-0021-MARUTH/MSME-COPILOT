@@ -16,13 +16,13 @@ from app.schemas.analytics import (
 
 router = APIRouter(prefix="/api", tags=["Analytics & Business Intelligence"], dependencies=[Depends(get_current_user)])
 
-def build_product_forecast(prod: Product, inv_qty: int, db: Session, today: date) -> ForecastItem:
+def build_product_forecast(prod: Product, inv_qty: int, db: Session, today: date, shop_id: str) -> ForecastItem:
     """Helper to extract daily sales and compute product forecast."""
     sales_query = db.query(
         func.date(Sale.created_at).label('sale_date'),
         func.sum(SaleItem.quantity).label('daily_qty')
     ).join(SaleItem, Sale.id == SaleItem.sale_id)\
-     .filter(SaleItem.product_id == prod.id)\
+     .filter(SaleItem.product_id == prod.id, Sale.shop_id == shop_id)\
      .group_by(func.date(Sale.created_at)).all()
 
     daily_sales_map = {}
@@ -56,12 +56,13 @@ def build_product_forecast(prod: Product, inv_qty: int, db: Session, today: date
     )
 
 @router.get("/dashboard", response_model=DashboardSummaryResponse)
-def get_dashboard_analytics(shop_id: str = "shop_001", db: Session = Depends(get_db)):
+def get_dashboard_analytics(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     """
     Expanded real database-backed dashboard analytics.
     Every number comes from database query aggregations.
     """
     today = date.today()
+    shop_id = current_user["shop_id"]
 
     # 1. Today's Financial Summary
     today_sales_records = db.query(Sale).filter(
@@ -140,7 +141,7 @@ def get_dashboard_analytics(shop_id: str = "shop_001", db: Session = Depends(get
 
         last_sale = db.query(func.max(Sale.created_at))\
                       .join(SaleItem, Sale.id == SaleItem.sale_id)\
-                      .filter(SaleItem.product_id == p.id).scalar()
+                      .filter(SaleItem.product_id == p.id, Sale.shop_id == shop_id).scalar()
 
         last_sale_str = last_sale.strftime('%Y-%m-%d') if last_sale else "Never"
 
@@ -172,7 +173,7 @@ def get_dashboard_analytics(shop_id: str = "shop_001", db: Session = Depends(get
     for inv in inventories:
         p = prod_map.get(inv.product_id)
         if p:
-            fc = build_product_forecast(p, inv.quantity, db, today)
+            fc = build_product_forecast(p, inv.quantity, db, today, shop_id)
             if fc.stock_status in ["OUT_OF_STOCK", "LOW_STOCK", "AT_RISK"] or fc.planning_suggestion.recommended_purchase > 0:
                 reorder_suggestions.append(fc)
 
@@ -197,9 +198,10 @@ def get_dashboard_analytics(shop_id: str = "shop_001", db: Session = Depends(get
 @router.get("/analytics/sales-trend", response_model=SalesTrendResponse)
 def get_sales_trend(
     days: int = Query(30, ge=7, le=90),
-    shop_id: str = "shop_001",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
+    shop_id = current_user["shop_id"]
     """
     Daily sales trend over a selectable period (7, 30, or 90 days).
     Queries real daily aggregations from DB sales table.
@@ -275,9 +277,10 @@ def get_sales_trend(
     )
 
 @router.get("/analytics/products", response_model=List[ProductPerformanceItem])
-def get_product_performance(shop_id: str = "shop_001", db: Session = Depends(get_db)):
+def get_product_performance(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    shop_id = current_user["shop_id"]
     today = date.today()
-    products = db.query(Product).all()
+    products = db.query(Product).filter(Product.shop_id == shop_id).all()
     inventories = db.query(Inventory).filter(Inventory.shop_id == shop_id).all()
     inv_map = {i.product_id: i.quantity for i in inventories}
 
@@ -305,7 +308,7 @@ def get_product_performance(shop_id: str = "shop_001", db: Session = Depends(get
         margin = round((prof / rev * 100), 2) if rev > 0 else 0.0
         inv_val = round(qty * float(p.purchase_price), 2)
 
-        fc = build_product_forecast(p, qty, db, today)
+        fc = build_product_forecast(p, qty, db, today, shop_id)
 
         result.append(ProductPerformanceItem(
             product_id=p.id,
@@ -330,16 +333,17 @@ def get_product_performance(shop_id: str = "shop_001", db: Session = Depends(get
     return result
 
 @router.get("/analytics/forecast", response_model=ForecastResponse)
-def get_demand_forecasts(shop_id: str = "shop_001", db: Session = Depends(get_db)):
+def get_demand_forecasts(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    shop_id = current_user["shop_id"]
     today = date.today()
-    products = db.query(Product).all()
+    products = db.query(Product).filter(Product.shop_id == shop_id).all()
     inventories = db.query(Inventory).filter(Inventory.shop_id == shop_id).all()
     inv_map = {i.product_id: i.quantity for i in inventories}
 
     forecasts = []
     for p in products:
         qty = inv_map.get(p.id, 0)
-        fc = build_product_forecast(p, qty, db, today)
+        fc = build_product_forecast(p, qty, db, today, shop_id)
         forecasts.append(fc)
 
     return ForecastResponse(
@@ -349,8 +353,9 @@ def get_demand_forecasts(shop_id: str = "shop_001", db: Session = Depends(get_db
     )
 
 @router.get("/analytics/products/{product_id}", response_model=ProductDetailAnalytics)
-def get_product_detail_analytics(product_id: str, shop_id: str = "shop_001", db: Session = Depends(get_db)):
-    prod = db.query(Product).filter(Product.id == product_id).first()
+def get_product_detail_analytics(product_id: str, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    shop_id = current_user["shop_id"]
+    prod = db.query(Product).filter(Product.id == product_id, Product.shop_id == shop_id).first()
     if not prod:
         raise HTTPException(status_code=404, detail=f"Product '{product_id}' not found.")
 
@@ -374,7 +379,7 @@ def get_product_detail_analytics(product_id: str, shop_id: str = "shop_001", db:
     margin = round((prof / rev * 100), 2) if rev > 0 else 0.0
 
     today = date.today()
-    fc = build_product_forecast(prod, qty, db, today)
+    fc = build_product_forecast(prod, qty, db, today, shop_id)
 
     recent_sales_records = db.query(SaleItem, Sale)\
         .join(Sale, Sale.id == SaleItem.sale_id)\

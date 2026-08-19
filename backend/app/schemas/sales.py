@@ -8,9 +8,12 @@ class SaleParseRequest(BaseModel):
 
 class ParsedSaleCandidate(BaseModel):
     product_id: str
+    sku: Optional[str] = None
     name: str
+    aliases: Optional[str] = None
     category: str
     selling_price: float
+    match_type: str = "fuzzy"
 
 class ParsedSaleItem(BaseModel):
     raw_segment: str
@@ -19,6 +22,9 @@ class ParsedSaleItem(BaseModel):
     match_status: str  # "MATCHED", "AMBIGUOUS", "NEEDS_MATCH"
     matched_product_id: Optional[str] = None
     matched_product_name: Optional[str] = None
+    match_type: Optional[str] = None
+    sku: Optional[str] = None
+    aliases: Optional[str] = None
     selling_price: float = 0.0
     purchase_price: float = 0.0
     line_total: float = 0.0

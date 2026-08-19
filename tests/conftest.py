@@ -4,8 +4,10 @@ from app.db.models import Base
 from app.main import app
 from app.api.deps import get_current_user
 
-def mock_get_current_user():
-    return {"id": "test-user-id", "email": "test@example.com"}
+from fastapi import Header
+
+def mock_get_current_user(x_shop_id: str = Header(default="shop_001", alias="X-Shop-ID")):
+    return {"id": "test-user-id", "email": "test@example.com", "shop_id": x_shop_id}
 
 app.dependency_overrides[get_current_user] = mock_get_current_user
 

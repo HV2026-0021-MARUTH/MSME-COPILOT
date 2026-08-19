@@ -12,9 +12,10 @@ router = APIRouter(prefix="/api/reports", tags=["Business Reports"], dependencie
 @router.get("/pdf")
 def download_pdf_report(
     period: str = Query("7d", description="Report period: today, 7d, 30d"),
-    shop_id: str = "shop_001",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
+    shop_id = current_user["shop_id"]
     """
     Download Business Report in PDF format.
     CRITICAL SAFETY GUARANTEE: READ-ONLY. Zero database mutations.
@@ -33,9 +34,10 @@ def download_pdf_report(
 @router.get("/xlsx")
 def download_xlsx_report(
     period: str = Query("7d", description="Report period: today, 7d, 30d"),
-    shop_id: str = "shop_001",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
+    shop_id = current_user["shop_id"]
     """
     Download Business Report in Excel XLSX format (7 distinct sheets).
     CRITICAL SAFETY GUARANTEE: READ-ONLY. Zero database mutations.
@@ -54,9 +56,10 @@ def download_xlsx_report(
 @router.get("/png")
 def download_png_report(
     period: str = Query("7d", description="Report period: today, 7d, 30d"),
-    shop_id: str = "shop_001",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
+    shop_id = current_user["shop_id"]
     """
     Download Executive Summary Snapshot Card in PNG format (WhatsApp / mobile shareable).
     CRITICAL SAFETY GUARANTEE: READ-ONLY. Zero database mutations.

@@ -10,7 +10,9 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
     unit: 'pack',
     purchase_price: 0,
     selling_price: 0,
-    reorder_level: 10
+    reorder_level: 10,
+    sku: '',
+    aliases: ''
   })
   const [error, setError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -24,7 +26,9 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
         unit: initialData.unit || 'pack',
         purchase_price: initialData.purchase_price ?? 0,
         selling_price: initialData.selling_price ?? 0,
-        reorder_level: initialData.reorder_level ?? 10
+        reorder_level: initialData.reorder_level ?? 10,
+        sku: initialData.sku || '',
+        aliases: initialData.aliases ? (typeof initialData.aliases === 'string' ? initialData.aliases : JSON.parse(initialData.aliases).join(', ')) : ''
       })
     } else {
       setFormData({
@@ -34,7 +38,9 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
         unit: 'pack',
         purchase_price: 0,
         selling_price: 0,
-        reorder_level: 10
+        reorder_level: 10,
+        sku: '',
+        aliases: ''
       })
     }
     setError(null)
@@ -79,7 +85,8 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
         unit: formData.unit.trim() || 'pack',
         purchase_price: Number(formData.purchase_price),
         selling_price: Number(formData.selling_price),
-        reorder_level: Number(formData.reorder_level)
+        reorder_level: Number(formData.reorder_level),
+        aliases: formData.aliases ? formData.aliases.split(',').map(a => a.trim()).filter(a => a).join(',') : ""
       }
 
       const res = await fetchWithAuth(url, {
@@ -213,6 +220,29 @@ export default function ProductFormModal({ isOpen, onClose, onSave, initialData 
               onChange={e => setFormData({ ...formData, reorder_level: e.target.value })}
               style={{ width: '100%', padding: '0.5rem 0.75rem', background: '#0f172a', border: '1px solid var(--border-color)', borderRadius: '0.375rem', color: 'white' }}
             />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.75rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>SKU (Auto-generated)</label>
+              <input
+                type="text"
+                disabled
+                value={formData.sku || ''}
+                style={{ width: '100%', padding: '0.5rem 0.75rem', background: 'rgba(15, 23, 42, 0.5)', border: '1px solid var(--border-color)', borderRadius: '0.375rem', color: 'var(--text-muted)', cursor: 'not-allowed' }}
+                placeholder="Auto-assigned on creation"
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Aliases (Comma separated)</label>
+              <input
+                type="text"
+                value={formData.aliases || ''}
+                onChange={e => setFormData({ ...formData, aliases: e.target.value })}
+                style={{ width: '100%', padding: '0.5rem 0.75rem', background: '#0f172a', border: '1px solid var(--border-color)', borderRadius: '0.375rem', color: 'white' }}
+                placeholder="e.g. dairy milk 40g, choco"
+              />
+            </div>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>

@@ -211,13 +211,28 @@ export default function InvoiceReview({ extractionData, products, onConfirmSucce
                       </span>
                     </span>
                   )}
+                  {item.sku && (
+                    <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                       SKU: {item.sku}
+                    </span>
+                  )}
                 </td>
 
                 <td style={{ padding: '0.75rem 1rem' }}>
                   {item.match_status === 'MATCHED' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.2rem 0.5rem', borderRadius: '0.375rem', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)', fontWeight: '600' }}>
-                      <CheckCircle size={12} /> Matched
-                    </span>
+                    <>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.2rem 0.5rem', borderRadius: '0.375rem', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)', fontWeight: '600' }}>
+                        <CheckCircle size={12} /> 
+                        {item.match_type === 'exact_sku' ? 'Exact SKU Match' : 
+                         item.match_type === 'exact_name' ? 'Exact Name Match' : 
+                         item.match_type === 'alias' ? 'Alias Match' : 'Matched'}
+                      </span>
+                      {item.match_type === 'fuzzy' && (
+                        <span style={{ display: 'block', marginTop: '0.3rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                           (Fuzzy matched)
+                        </span>
+                      )}
+                    </>
                   ) : (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.2rem 0.5rem', borderRadius: '0.375rem', fontSize: '0.75rem', background: 'rgba(245, 158, 11, 0.15)', color: 'var(--accent-amber)', fontWeight: '600' }}>
                       <AlertTriangle size={12} /> Needs Match

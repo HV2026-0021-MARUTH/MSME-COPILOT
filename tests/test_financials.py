@@ -131,7 +131,7 @@ def test_manual_purchase_increases_inventory_and_creates_records():
         ]
     }
 
-    res_purch = client.post("/api/purchases/manual", json=purchase_payload)
+    res_purch = client.post("/api/purchases/confirm", json=purchase_payload)
     assert res_purch.status_code in [200, 201]
     purch_data = res_purch.json()
     assert purch_data["status"] == "confirmed"
@@ -152,7 +152,7 @@ def test_purchase_transactional_rollback_on_invalid_item():
     inv_before = client.get("/api/inventory").json()
     qty_before = next(i for i in inv_before if i["product_id"] == "prod_002")["quantity"]
 
-    res_fail = client.post("/api/purchases/manual", json=purchase_payload)
+    res_fail = client.post("/api/purchases/confirm", json=purchase_payload)
     assert res_fail.status_code in [400, 404]
 
     inv_after = client.get("/api/inventory").json()
@@ -164,7 +164,7 @@ def test_invalid_purchase_quantity_rejected():
         "shop_id": "shop_001",
         "items": [{"product_id": "prod_001", "quantity": -5, "unit_cost": 15.00}]
     }
-    res = client.post("/api/purchases/manual", json=payload)
+    res = client.post("/api/purchases/confirm", json=payload)
     assert res.status_code in [400, 422]
 
 def test_dashboard_values_database_backed():

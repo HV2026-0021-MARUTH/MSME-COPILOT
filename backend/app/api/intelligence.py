@@ -33,9 +33,10 @@ def get_seasonal_intelligence():
 @router.post("/local", response_model=LocalIntelligenceResponse)
 def get_local_intelligence(
     req: LocalIntelligenceRequest,
-    shop_id: str = "shop_001",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
 ):
+    shop_id = current_user["shop_id"]
     """
     Get grounded 3-level evidence local intelligence recommendations based on 3-tier location fallback:
     Tier 1: Browser GPS

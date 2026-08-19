@@ -50,12 +50,13 @@ def build_product_forecast_internal(prod: Product, inv_qty: int, db: Session, to
     )
 
 @router.get("", response_model=DashboardSummaryResponse)
-def get_dashboard_summary(shop_id: str = "shop_001", db: Session = Depends(get_db)):
+def get_dashboard_summary(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     """
     Expanded real database-backed dashboard summary.
     Every metric is derived deterministically from database records.
     """
     today = date.today()
+    shop_id = current_user["shop_id"]
 
     sales = db.query(Sale).filter(Sale.shop_id == shop_id).all()
     today_rev = round(sum(float(s.total_amount) for s in sales), 2)
@@ -64,7 +65,7 @@ def get_dashboard_summary(shop_id: str = "shop_001", db: Session = Depends(get_d
     today_margin = round((today_profit / today_rev * 100), 2) if today_rev > 0 else 0.0
 
     inventories = db.query(Inventory).filter(Inventory.shop_id == shop_id).all()
-    products = db.query(Product).all()
+    products = db.query(Product).filter(Product.shop_id == shop_id).all()
     prod_map = {p.id: p for p in products}
 
     inventory_value = 0.0

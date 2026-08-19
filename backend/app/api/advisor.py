@@ -8,7 +8,8 @@ from app.services.advisor_service import get_tomorrow_action_plan, answer_adviso
 router = APIRouter(prefix="/api/advisor", tags=["AI Business Advisor"], dependencies=[Depends(get_current_user)])
 
 @router.get("/tomorrow", response_model=TomorrowPlanResponse)
-def get_tomorrow_plan(shop_id: str = "shop_001", db: Session = Depends(get_db)):
+def get_tomorrow_plan(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    shop_id = current_user["shop_id"]
     """
     Get prioritized action plan for tomorrow based on verified evidence pipeline.
     CRITICAL SAFETY GUARANTEE: READ-ONLY. Zero database mutations.
@@ -17,7 +18,8 @@ def get_tomorrow_plan(shop_id: str = "shop_001", db: Session = Depends(get_db)):
     return plan
 
 @router.post("/ask", response_model=AdvisorAskResponse)
-def ask_advisor(req: AdvisorAskRequest, db: Session = Depends(get_db)):
+def ask_advisor(req: AdvisorAskRequest, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    shop_id = current_user["shop_id"]
     """
     Ask a natural-language question to the AI Business Advisor.
     Returns grounded answer with cited facts from verified database evidence.
@@ -26,5 +28,5 @@ def ask_advisor(req: AdvisorAskRequest, db: Session = Depends(get_db)):
     if not req.question or not req.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    res = answer_advisor_question(req.question.strip(), db, req.shop_id)
+    res = answer_advisor_question(req.question.strip(), db, shop_id)
     return res

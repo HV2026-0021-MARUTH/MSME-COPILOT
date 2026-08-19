@@ -3,21 +3,7 @@ import React, { useState } from 'react'
 import { CheckCircle, AlertTriangle, Trash2, ArrowLeft, ShieldCheck, HelpCircle } from 'lucide-react'
 
 export default function SaleReview({ parseData, products, onConfirmSuccess, onBack }) {
-  // Pre-select candidate #1 for ambiguous items while requiring explicit confirmation badge
-  const initialItems = (parseData.items || []).map(item => {
-    if (item.match_status === 'AMBIGUOUS' && item.candidates && item.candidates.length > 0) {
-      const top = item.candidates[0]
-      return {
-        ...item,
-        matched_product_id: top.product_id,
-        matched_product_name: top.name,
-        selling_price: top.selling_price,
-        purchase_price: top.purchase_price || 0,
-        match_status: 'AMBIGUOUS_UNCONFIRMED'
-      }
-    }
-    return item
-  })
+  const initialItems = parseData.items || []
 
   const [items, setItems] = useState(initialItems)
   const [source, setSource] = useState(parseData.mode || 'text')
@@ -165,7 +151,7 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
           <tbody>
             {items.map((item, idx) => {
               const stockErr = checkStockWarning(item)
-              const isAmbiguous = item.match_status === 'AMBIGUOUS' || item.match_status === 'AMBIGUOUS_UNCONFIRMED'
+              const isAmbiguous = item.match_status === 'AMBIGUOUS'
               return (
                 <tr key={idx} style={{ borderBottom: '1px solid var(--border-color)', background: stockErr ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
                   <td style={{ padding: '0.75rem 1rem', fontWeight: '500' }}>
@@ -177,12 +163,25 @@ export default function SaleReview({ parseData, products, onConfirmSuccess, onBa
                         </span>
                       </span>
                     )}
+                    {item.sku && (
+                       <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                          SKU: {item.sku}
+                       </span>
+                    )}
                   </td>
 
                   <td style={{ padding: '0.75rem 1rem' }}>
                     {(item.match_status === 'MATCHED' || item.match_status === 'EXACT') && (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', padding: '0.2rem 0.5rem', borderRadius: '0.375rem', fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-green)', fontWeight: '600' }}>
-                        <CheckCircle size={12} /> Matched
+                        <CheckCircle size={12} /> 
+                        {item.match_type === 'exact_sku' ? 'Exact SKU Match' : 
+                         item.match_type === 'exact_name' ? 'Exact Name Match' : 
+                         item.match_type === 'alias' ? 'Alias Match' : 'Matched'}
+                      </span>
+                    )}
+                    {item.match_type === 'fuzzy' && (item.match_status === 'MATCHED' || item.match_status === 'EXACT') && (
+                      <span style={{ display: 'block', marginTop: '0.3rem', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                         (Fuzzy matched)
                       </span>
                     )}
                     {isAmbiguous && (

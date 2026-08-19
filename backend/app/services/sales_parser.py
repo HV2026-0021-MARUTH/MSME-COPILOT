@@ -38,19 +38,28 @@ def get_prod_cp(prod: Any) -> float:
         return float(prod.get("purchase_price", 0.0))
     return float(getattr(prod, "purchase_price", 0.0))
 
+def get_prod_sku(prod: Any) -> str:
+    if isinstance(prod, dict):
+        return prod.get("sku", "")
+    return getattr(prod, "sku", "") or ""
+
+def get_prod_aliases(prod: Any) -> str:
+    if isinstance(prod, dict):
+        return prod.get("aliases", "")
+    return getattr(prod, "aliases", "") or ""
+
 def find_candidate_products(query: str, db_products: List[Any]) -> List[Dict[str, Any]]:
     """
-    Find candidate DB products matching a query string (handles exact, substring, prefix, and fuzzy/colloquial matching).
+    Find candidate DB products matching a query string (handles exact SKU, exact name, alias, and fuzzy).
     """
     norm_query = normalize_string(query)
     if not norm_query or not db_products:
         return []
 
-    # Map colloquial shortcuts
+    query_variants = [norm_query]
+    # Keep colloquial shortcuts if needed, or rely on aliases
     if norm_query == "coke":
-        query_variants = ["coke", "coca", "coca cola"]
-    else:
-        query_variants = [norm_query]
+        query_variants.extend(["coca", "coca cola"])
 
     candidates = []
     seen_ids = set()
@@ -58,43 +67,91 @@ def find_candidate_products(query: str, db_products: List[Any]) -> List[Dict[str
     for prod in db_products:
         prod_id = get_prod_id(prod)
         prod_name = get_prod_name(prod)
+        prod_sku = get_prod_sku(prod)
+        prod_aliases = get_prod_aliases(prod)
+        
         norm_prod = normalize_string(prod_name)
+        norm_sku = normalize_string(prod_sku)
+        aliases_list = [normalize_string(a.strip()) for a in prod_aliases.split(',') if a.strip()]
 
         matched = False
         score = 0.0
+        match_type = "fuzzy"
 
         for q in query_variants:
-            # 1. Exact Match
+            # 1. Exact SKU Match (Highest priority)
+            if norm_sku and q == norm_sku:
+                score = 1.0
+                matched = True
+                match_type = "exact_sku"
+                break
+                
+            # 2. Exact Product Name Match
             if q == norm_prod:
                 score = 1.0
                 matched = True
+                match_type = "exact_name"
                 break
 
-            # 2. Substring Match
+            # 3. Alias Match
+            if q in aliases_list:
+                score = 0.95
+                matched = True
+                match_type = "alias"
+                break
+
+            # 4. Substring Match
             if q in norm_prod or norm_prod in q:
-                score = max(score, 0.85)
+                if len(q) > 4:
+                    if score < 0.85:
+                        score = 0.85
+                        match_type = "fuzzy"
+                else:
+                    if score < 0.60:
+                        score = 0.60
+                        match_type = "fuzzy"
                 matched = True
 
-            # 3. Partial Token Match (e.g., 'coke' matching 'coca-cola')
+            # 5. Partial Token Match
             q_tokens = q.split()
             p_tokens = norm_prod.split()
+            
+            matches = 0
             for qt in q_tokens:
+                if len(qt) < 2:
+                    continue
                 for pt in p_tokens:
-                    if len(qt) >= 3 and len(pt) >= 3 and (qt in pt or pt in qt or qt[:3] == pt[:3]):
-                        score = max(score, 0.70)
-                        matched = True
+                    if len(pt) < 2:
+                        continue
+                    if qt == pt or qt in pt or pt in qt:
+                        matches += 1
+                        break
+            
+            if matches > 0 and len(q_tokens) > 0:
+                token_score = (matches / len(q_tokens)) * 0.75
+                if token_score > score:
+                    score = token_score
+                    match_type = "fuzzy"
+                matched = True
 
-            # 4. Fuzzy Sequence Match
+            # 6. Fuzzy Sequence Match
             ratio = difflib.SequenceMatcher(None, q, norm_prod).ratio()
             if ratio >= 0.45:
-                score = max(score, ratio)
+                if ratio > score:
+                    score = ratio
+                    match_type = "fuzzy"
                 matched = True
 
         if matched and prod_id not in seen_ids:
             seen_ids.add(prod_id)
-            candidates.append({"product": prod, "score": round(score, 2)})
+            candidates.append({
+                "product": prod, 
+                "score": round(score, 2),
+                "match_type": match_type
+            })
 
-    candidates.sort(key=lambda x: x["score"], reverse=True)
+    # Sort by score desc, then exact matches first
+    candidates.sort(key=lambda x: (x["score"], 1 if x["match_type"] in ["exact_sku", "exact_name"] else 0), reverse=True)
     return candidates
 
 def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
@@ -150,6 +207,9 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
         unit_sp = 0.0
         unit_cp = 0.0
         confidence = 0.0
+        match_type = None
+        sku = None
+        aliases = None
         candidate_list = []
 
         if candidates:
@@ -159,9 +219,12 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
             candidate_list = [
                 {
                     "product_id": get_prod_id(c["product"]),
+                    "sku": get_prod_sku(c["product"]),
                     "name": get_prod_name(c["product"]),
+                    "aliases": get_prod_aliases(c["product"]),
                     "category": getattr(c["product"], 'category', 'General') if not isinstance(c["product"], dict) else c["product"].get('category', 'General'),
-                    "selling_price": get_prod_sp(c["product"])
+                    "selling_price": get_prod_sp(c["product"]),
+                    "match_type": c.get("match_type", "fuzzy")
                 }
                 for c in candidates[:5]
             ]
@@ -171,6 +234,9 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
                 match_status = "EXACT"
                 matched_prod_id = get_prod_id(top["product"])
                 matched_prod_name = get_prod_name(top["product"])
+                sku = get_prod_sku(top["product"])
+                aliases = get_prod_aliases(top["product"])
+                match_type = top["match_type"]
                 unit_sp = get_prod_sp(top["product"])
                 unit_cp = get_prod_cp(top["product"])
                 confidence = 1.0
@@ -180,6 +246,9 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
                 match_status = "MATCHED"
                 matched_prod_id = get_prod_id(top["product"])
                 matched_prod_name = get_prod_name(top["product"])
+                sku = get_prod_sku(top["product"])
+                aliases = get_prod_aliases(top["product"])
+                match_type = top["match_type"]
                 unit_sp = get_prod_sp(top["product"])
                 unit_cp = get_prod_cp(top["product"])
                 confidence = round(top_score, 2)
@@ -189,6 +258,9 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
                 match_status = "AMBIGUOUS"
                 matched_prod_id = get_prod_id(top["product"])
                 matched_prod_name = get_prod_name(top["product"])
+                sku = get_prod_sku(top["product"])
+                aliases = get_prod_aliases(top["product"])
+                match_type = top["match_type"]
                 unit_sp = get_prod_sp(top["product"])
                 unit_cp = get_prod_cp(top["product"])
                 confidence = round(top_score, 2)
@@ -212,6 +284,9 @@ def parse_sales_text(text: str, db_products: List[Any]) -> Dict[str, Any]:
             "match_status": match_status,
             "matched_product_id": matched_prod_id,
             "matched_product_name": matched_prod_name,
+            "match_type": match_type,
+            "sku": sku,
+            "aliases": aliases,
             "selling_price": unit_sp,
             "purchase_price": unit_cp,
             "line_total": line_total,
