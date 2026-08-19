@@ -65,6 +65,17 @@ __pycache__/
 temp_uploads/
 **/temp_uploads/
 
+# Scratch & Temporary Scripts / Artifacts
+scratch_test*.py
+test_dup.py
+run_test_twice.py
+*.db.bak
+task.md
+investigation_report.md
+walkthrough.md
+implementation_plan.md
+scratch/
+
 # Any nested virtual environments
 **/venv/
 **/.venv/
